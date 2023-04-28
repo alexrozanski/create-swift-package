@@ -11,7 +11,7 @@ import {
   getPlatform,
   type Platform,
 } from "./swift";
-import { versionCompareFn, versionCompareMapFn } from "./version";
+import { greaterThanOrEqual, lessThan, versionCompareMapFn } from "./version";
 
 const promptInitialConfig = async (projectDirectory?: string) => {
   const nameQuestion: PromptObject = {
@@ -27,6 +27,30 @@ const promptInitialConfig = async (projectDirectory?: string) => {
   }
 
   questions.push({
+    type: "select",
+    name: "minimumSwiftVersion",
+    message: "Which version of Swift does your package target?",
+    choices: allSwiftVersions
+      .sort(versionCompareMapFn((v) => v.version))
+      .map((version) => ({
+        title: `${version.version} ${chalk.gray(
+          `(Released ${new Date(
+            Date.parse(version.releaseDate)
+          ).toLocaleDateString()})`
+        )}`,
+        value: version.version,
+      })),
+  });
+
+  const response = await prompts(questions);
+  const name = z.string().parse(response.name);
+  const minimumSwiftVersion = z.string().parse(response.minimumSwiftVersion);
+
+  return { name, minimumSwiftVersion };
+};
+
+const promptPlatforms = async () => {
+  const response = await prompts({
     type: "multiselect",
     name: "platforms",
     message: "Which platforms does your package support?",
@@ -37,14 +61,14 @@ const promptInitialConfig = async (projectDirectory?: string) => {
     min: 1,
   });
 
-  const response = await prompts(questions);
-  const name = z.string().parse(response.name);
   const platforms = z.array(PlatformType).parse(response.platforms);
-
-  return { name, platforms };
+  return platforms;
 };
 
-const promptPlatformVersions = async (platforms: Platform["id"][]) => {
+const promptPlatformVersions = async (
+  platforms: Platform["id"][],
+  minimumSwiftVersion: string
+) => {
   const platformVersions: {
     platform: Platform["id"];
     minimumVersion: string;
@@ -57,10 +81,36 @@ const promptPlatformVersions = async (platforms: Platform["id"][]) => {
         type: "select",
         name: "version",
         message: `Which minimum ${platform.name} version do you want to support?`,
-        choices: platform.versions.sort(versionCompareFn).map((version) => ({
-          title: version,
-          value: version,
-        })),
+        choices: platform.versions
+          .sort(versionCompareMapFn((v) => v.version))
+          .map((version, index) => {
+            const deprecated =
+              version.deprecated != null &&
+              greaterThanOrEqual(minimumSwiftVersion, version.deprecated);
+            const notAvailableYet = lessThan(
+              minimumSwiftVersion,
+              version.introduced
+            );
+
+            let title: string;
+            if (deprecated && version.deprecated) {
+              title = `${version.version} ${chalk.gray(
+                `(Deprecated by Swift tools ${version.deprecated})`
+              )}`;
+            } else if (notAvailableYet) {
+              title = `${version.version} ${chalk.gray(
+                `(Available from Swift tools ${version.introduced})`
+              )}`;
+            } else {
+              title = version.version;
+            }
+
+            return {
+              title,
+              value: version.version,
+              disabled: deprecated || notAvailableYet,
+            };
+          }),
       });
 
       platformVersions.push({
@@ -120,47 +170,39 @@ const promptTargetConfig = async () => {
 };
 
 const promptMiscConfig = async () => {
-  const response = await prompts([
-    {
-      type: "select",
-      name: "minimumSwiftVersion",
-      message: "Which version of Swift does your package target?",
-      choices: allSwiftVersions
-        .sort(versionCompareMapFn((v) => v.version))
-        .map((version) => ({
-          title: `${version.version} ${chalk.gray(
-            `(Released ${new Date(
-              Date.parse(version.releaseDate)
-            ).toLocaleDateString()})`
-          )}`,
-          value: version.version,
-        })),
-    },
-    {
-      type: "toggle",
-      name: "includeTests",
-      message: "Include tests?",
-      active: "Yes",
-      inactive: "No",
-      initial: true,
-    },
-  ]);
+  const response = await prompts({
+    type: "toggle",
+    name: "includeTests",
+    message: "Include tests?",
+    active: "Yes",
+    inactive: "No",
+    initial: true,
+  });
 
-  const minimumSwiftVersion = z.string().parse(response.minimumSwiftVersion);
   const includeTests = z.boolean().parse(response.includeTests);
 
-  return { minimumSwiftVersion, includeTests };
+  return { includeTests };
 };
 
 export const promptConfig = async (
   projectDirectory?: string
 ): Promise<Config | null> => {
-  const { name, platforms } = await promptInitialConfig(projectDirectory);
+  const { name, minimumSwiftVersion } = await promptInitialConfig(
+    projectDirectory
+  );
+  if (minimumSwiftVersion == null) {
+    return null;
+  }
+
+  const platforms = await promptPlatforms();
   if (platforms == null) {
     return null;
   }
 
-  const platformConfig = await promptPlatformVersions(platforms);
+  const platformConfig = await promptPlatformVersions(
+    platforms,
+    minimumSwiftVersion
+  );
   if (platformConfig.length == null) {
     return null;
   }
@@ -171,6 +213,7 @@ export const promptConfig = async (
   return {
     name,
     platforms: platformConfig,
+    minimumSwiftVersion,
     ...targetConfig,
     ...miscConfig,
   };

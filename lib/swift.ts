@@ -10,10 +10,17 @@ export const PlatformType = z.union([
   z.literal("watchOS"),
   z.literal("tvOS"),
 ]);
+
+const PlatformVersion = z.object({
+  version: z.string(),
+  introduced: z.string(),
+  deprecated: z.optional(z.string()),
+});
+export type PlatformVersion = z.TypeOf<typeof PlatformVersion>;
 const Platform = z.object({
   id: PlatformType,
   name: z.string(),
-  versions: z.array(z.string()),
+  versions: z.array(PlatformVersion),
 });
 export type Platform = z.TypeOf<typeof Platform>;
 

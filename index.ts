@@ -2,7 +2,6 @@
 
 import { exit } from "process";
 import { parse } from "./lib/cli";
-import { createPackage } from "./lib/create";
 import { promptConfig } from "./lib/prompt";
 import packageJson from "./package.json";
 
@@ -15,5 +14,5 @@ const cli = parse(process.argv, packageJson);
     exit(1);
   }
 
-  createPackage('', config)
+  console.log(config);
 })();
