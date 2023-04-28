@@ -4,7 +4,8 @@
   "description": "An interactive and more fully-featured alternative to swift package init",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon esbuild.config.js"
+    "dev": "nodemon esbuild.config.js",
+    "test": "jest"
   },
   "keywords": [
     "swift",
@@ -21,12 +22,18 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.1",
     "@types/node": "^18.16.2",
     "@types/prompts": "2.0.1",
+    "@types/tmp": "^0.2.3",
     "esbuild": "^0.17.18",
     "esbuild-config": "^1.0.1",
     "esbuild-plugin-yaml": "^0.0.1",
+    "jest": "^29.5.0",
     "nodemon": "^2.0.22",
+    "tmp": "^0.2.1",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.1",
     "typescript": "^5.0.4",
     "yaml": "^2.2.2"
   }
