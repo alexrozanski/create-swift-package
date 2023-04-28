@@ -14,7 +14,7 @@ export const allTargetLanguages: TargetLanguage[] = [
 ];
 
 export type Config = {
-  name?: string;
+  name: string;
   platforms: { platform: Platform["id"]; minimumVersion: string }[];
   targetType: TargetType;
   targetLanguage: TargetLanguage;

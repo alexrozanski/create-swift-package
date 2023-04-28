@@ -13,9 +13,7 @@ import {
 } from "./swift";
 import { versionCompareFn, versionCompareMapFn } from "./version";
 
-const promptInitialConfig = async (
-  projectDirectory?: string
-): Promise<{ name?: string; platforms?: Platform["id"][] }> => {
+const promptInitialConfig = async (projectDirectory?: string) => {
   const nameQuestion: PromptObject = {
     type: "text",
     name: "name",
@@ -40,7 +38,7 @@ const promptInitialConfig = async (
   });
 
   const response = await prompts(questions);
-  const name = z.optional(z.string()).parse(response.name);
+  const name = z.string().parse(response.name);
   const platforms = z.array(PlatformType).parse(response.platforms);
 
   return { name, platforms };
