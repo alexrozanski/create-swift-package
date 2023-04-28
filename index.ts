@@ -8,11 +8,16 @@ import packageJson from "./package.json";
 const cli = parse(process.argv, packageJson);
 
 (async function () {
-  const config = await promptConfig(cli.projectDirectory);
-  if (config == null) {
+  try {
+    const config = await promptConfig(cli.projectDirectory);
+    if (config == null) {
+      console.log("Exiting.");
+      exit(1);
+    }
+
+    console.log(config);
+  } catch {
     console.log("Exiting.");
     exit(1);
   }
-
-  console.log(config);
 })();

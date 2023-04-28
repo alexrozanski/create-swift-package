@@ -31,7 +31,7 @@ const promptInitialConfig = async (
   questions.push({
     type: "multiselect",
     name: "platforms",
-    message: "Which platforms does your    package support?",
+    message: "Which platforms does your package support?",
     choices: allPlatforms.map((platform) => ({
       title: platform.name,
       value: platform.id,
