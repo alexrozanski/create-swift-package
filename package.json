@@ -1,0 +1,33 @@
+{
+  "name": "create-swift-package",
+  "version": "1.0.0",
+  "description": "An interactive and more fully-featured alternative to swift package init",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon esbuild.config.js"
+  },
+  "keywords": [
+    "swift",
+    "packages"
+  ],
+  "author": "Alex Rozanski",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^5.2.0",
+    "commander": "^10.0.1",
+    "js-yaml-loader": "^1.2.2",
+    "meow": "^11.0.0",
+    "prompts": "2.1.0",
+    "zod": "^3.21.4"
+  },
+  "devDependencies": {
+    "@types/node": "^18.16.2",
+    "@types/prompts": "2.0.1",
+    "esbuild": "^0.17.18",
+    "esbuild-config": "^1.0.1",
+    "esbuild-plugin-yaml": "^0.0.1",
+    "nodemon": "^2.0.22",
+    "typescript": "^5.0.4",
+    "yaml": "^2.2.2"
+  }
+}

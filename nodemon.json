@@ -1,0 +1,5 @@
+{
+  "watch": ["index.ts", "lib/**/*.ts"],
+  "ignore": ["dist/**"],
+  "ext": "ts"
+}
