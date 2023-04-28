@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import prompts, { PromptObject } from "prompts";
 import { z } from "zod";
+import { Config, TargetLanguage, allTargetLanguages } from "./config";
 import {
   PlatformType,
   TargetType,
@@ -10,23 +11,7 @@ import {
   getPlatform,
   type Platform,
 } from "./swift";
-
-const TargetLanguage = z.union([
-  z.literal("swift"),
-  z.literal("cfamily"),
-  z.literal("mixed"),
-]);
-type TargetLanguage = z.TypeOf<typeof TargetLanguage>;
-const allTargetLanguages: TargetLanguage[] = ["swift", "cfamily", "mixed"];
-
-export type Config = {
-  name?: string;
-  platforms: { platform: Platform["id"]; minimumVersion: string }[];
-  targetType: TargetType;
-  targetLanguage: TargetLanguage;
-  minimumSwiftVersion: string;
-  includeTests: boolean;
-};
+import { versionCompareFn, versionCompareMapFn } from "./version";
 
 const promptInitialConfig = async (
   projectDirectory?: string
@@ -74,7 +59,7 @@ const promptPlatformVersions = async (platforms: Platform["id"][]) => {
         type: "select",
         name: "version",
         message: `Which minimum ${platform.name} version do you want to support?`,
-        choices: platform.versions.map((version) => ({
+        choices: platform.versions.sort(versionCompareFn).map((version) => ({
           title: version,
           value: version,
         })),
@@ -142,14 +127,16 @@ const promptMiscConfig = async () => {
       type: "select",
       name: "minimumSwiftVersion",
       message: "Which version of Swift does your package target?",
-      choices: allSwiftVersions.map((version) => ({
-        title: `${version.version} ${chalk.gray(
-          `(Released ${new Date(
-            Date.parse(version.releaseDate)
-          ).toLocaleDateString()})`
-        )}`,
-        value: version.version,
-      })),
+      choices: allSwiftVersions
+        .sort(versionCompareMapFn((v) => v.version))
+        .map((version) => ({
+          title: `${version.version} ${chalk.gray(
+            `(Released ${new Date(
+              Date.parse(version.releaseDate)
+            ).toLocaleDateString()})`
+          )}`,
+          value: version.version,
+        })),
     },
     {
       type: "toggle",
