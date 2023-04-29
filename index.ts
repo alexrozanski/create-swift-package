@@ -5,6 +5,8 @@ import { parse } from "./lib/cli";
 import { promptConfig } from "./lib/prompt";
 import packageJson from "./package.json";
 
+console.log(process.cwd());
+
 const cli = parse(process.argv, packageJson);
 
 (async function () {

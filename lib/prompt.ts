@@ -1,15 +1,16 @@
 import chalk from "chalk";
 import prompts, { PromptObject } from "prompts";
 import { z } from "zod";
-import { Config, TargetLanguage, allTargetLanguages } from "./config";
+import { Config, PlatformWithVersion } from "./config";
 import {
-  PlatformType,
+  Platform,
+  TargetLanguage,
   TargetType,
   allPlatforms,
   allSwiftVersions,
+  allTargetLanguages,
   allTargetTypes,
-  getPlatform,
-  type Platform,
+  getPlatformInfo,
 } from "./swift";
 import { greaterThanOrEqual, lessThan, versionCompareMapFn } from "./version";
 
@@ -34,9 +35,7 @@ const promptInitialConfig = async (projectDirectory?: string) => {
       .sort(versionCompareMapFn((v) => v.version))
       .map((version) => ({
         title: `${version.version} ${chalk.gray(
-          `(Released ${new Date(
-            Date.parse(version.releaseDate)
-          ).toLocaleDateString()})`
+          `(Released ${version.releaseDate.toLocaleDateString()})`
         )}`,
         value: version.version,
       })),
@@ -61,29 +60,35 @@ const promptPlatforms = async () => {
     min: 1,
   });
 
-  const platforms = z.array(PlatformType).parse(response.platforms);
+  const platforms = z
+    .array(
+      z.union([
+        z.literal("macOS"),
+        z.literal("iOS"),
+        z.literal("watchOS"),
+        z.literal("tvOS"),
+      ])
+    )
+    .parse(response.platforms);
   return platforms;
 };
 
 const promptPlatformVersions = async (
-  platforms: Platform["id"][],
+  platforms: Platform[],
   minimumSwiftVersion: string
 ) => {
-  const platformVersions: {
-    platform: Platform["id"];
-    minimumVersion: string;
-  }[] = [];
+  const platformVersions: PlatformWithVersion<Platform>[] = [];
 
   for (const platformId of platforms) {
-    const platform = getPlatform(platformId);
-    if (platform != null) {
+    const platformInfo = getPlatformInfo(platformId);
+    if (platformInfo != null) {
       const response = await prompts({
         type: "select",
         name: "version",
-        message: `Which minimum ${platform.name} version do you want to support?`,
-        choices: platform.versions
+        message: `Which minimum ${platformInfo.name} version do you want to support?`,
+        choices: platformInfo.versions
           .sort(versionCompareMapFn((v) => v.version))
-          .map((version, index) => {
+          .map((version) => {
             const deprecated =
               version.deprecated != null &&
               greaterThanOrEqual(minimumSwiftVersion, version.deprecated);
@@ -115,7 +120,7 @@ const promptPlatformVersions = async (
 
       platformVersions.push({
         platform: platformId,
-        minimumVersion: z.string().parse(response.version),
+        minimumVersion: response.version,
       });
     }
   }

@@ -11,7 +11,7 @@ describe("Package tests", () => {
 
     createPackage(tmpDir.name, {
       name: "test",
-      platforms: [{ platform: "macOS", minimumVersion: "13.0" }],
+      platforms: [{ platform: "macOS", minimumVersion: "10.13" }],
       targetType: "library",
       targetLanguage: "swift",
       minimumSwiftVersion: "5.7.1",

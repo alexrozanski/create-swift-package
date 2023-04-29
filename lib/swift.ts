@@ -1,28 +1,63 @@
 import { z } from "zod";
-import platforms from "../data/platform.yml";
-import swiftVersions from "../data/swift.yml";
+import { platforms } from "../data/platforms";
+import { swiftVersions } from "../data/swift";
 
-// Types
+/* Platform */
 
-export const PlatformType = z.union([
-  z.literal("iOS"),
-  z.literal("macOS"),
-  z.literal("watchOS"),
-  z.literal("tvOS"),
-]);
+export const Platform = Object.keys(platforms);
+export type Platform = keyof typeof platforms;
+export type PlatformVersion<P extends Platform> =
+  (typeof platforms)[P]["versions"][number]["version"];
 
-const PlatformVersion = z.object({
-  version: z.string(),
-  introduced: z.string(),
-  deprecated: z.optional(z.string()),
+export type PlatformInfo<P extends Platform> = {
+  id: P;
+  name: string;
+  versions: { version: string; introduced: string; deprecated?: string }[];
+};
+
+const platformInfo = (platform: Platform) => ({
+  id: platform,
+  name: platforms[platform].name,
+  versions: platforms[platform].versions.slice(),
 });
-export type PlatformVersion = z.TypeOf<typeof PlatformVersion>;
-const Platform = z.object({
-  id: PlatformType,
-  name: z.string(),
-  versions: z.array(PlatformVersion),
-});
-export type Platform = z.TypeOf<typeof Platform>;
+
+export const allPlatforms: PlatformInfo<Platform>[] = [
+  platformInfo("iOS"),
+  platformInfo("macOS"),
+  platformInfo("watchOS"),
+  platformInfo("tvOS"),
+];
+
+export function getPlatformInfo<P extends Platform>(
+  platform: P
+): PlatformInfo<P> {
+  const { name, versions } = platforms[platform];
+  return { id: platform, name, versions: versions.slice() };
+}
+
+/* Versions */
+
+export type IOSVersion = PlatformVersion<"iOS">;
+export type MacOSVersion = PlatformVersion<"macOS">;
+export type WatchOSVersion = PlatformVersion<"watchOS">;
+export type TVOSVersion = PlatformVersion<"tvOS">;
+
+export type SwiftVersion = (typeof swiftVersions)[number]["version"];
+
+export type SwiftVersionInfo = {
+  version: SwiftVersion;
+  releaseDate: Date;
+  xcodeVersion: string;
+};
+export const allSwiftVersions: SwiftVersionInfo[] = swiftVersions
+  .slice()
+  .map((v) => ({
+    version: v.version,
+    releaseDate: new Date(Date.parse(v.releaseDate)),
+    xcodeVersion: v.xcodeVersion,
+  }));
+
+/* Targets */
 
 export const TargetType = z.union([
   z.literal("library"),
@@ -32,31 +67,14 @@ export const TargetType = z.union([
 export type TargetType = z.TypeOf<typeof TargetType>;
 export const allTargetTypes: TargetType[] = ["library", "executable", "plugin"];
 
-const SwiftVersion = z.object({
-  version: z.string(),
-  releaseDate: z.string(),
-  xcodeVersion: z.string(),
-});
-export type SwiftVersion = z.TypeOf<typeof SwiftVersion>;
-
-// Loaders
-
-export const allPlatforms = (() => {
-  return z
-    .object({
-      platforms: z.array(Platform),
-    })
-    .parse(platforms).platforms;
-})();
-
-export const getPlatform = (id: string) => {
-  return allPlatforms.filter((platform) => platform.id === id)[0];
-};
-
-export const allSwiftVersions = (() => {
-  return z
-    .object({
-      swiftVersions: z.array(SwiftVersion),
-    })
-    .parse(swiftVersions).swiftVersions;
-})();
+export const TargetLanguage = z.union([
+  z.literal("swift"),
+  z.literal("cfamily"),
+  z.literal("mixed"),
+]);
+export type TargetLanguage = z.TypeOf<typeof TargetLanguage>;
+export const allTargetLanguages: TargetLanguage[] = [
+  "swift",
+  "cfamily",
+  "mixed",
+];
