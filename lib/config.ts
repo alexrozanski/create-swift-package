@@ -1,4 +1,3 @@
-import { z } from "zod";
 import {
   SwiftVersion,
   type Platform,
@@ -16,17 +15,12 @@ export type PlatformWithVersion<P extends Platform> = {
   minimumVersion: PlatformVersion<P>;
 };
 
-export const LanguageOption = z.union([
-  z.literal("swift"),
-  z.literal("cfamily"),
-  z.literal("mixed"),
-]);
-export type LanguageOption = z.TypeOf<typeof LanguageOption>;
-export const allLanguageOptions: LanguageOption[] = [
-  "swift",
-  "cfamily",
-  "mixed",
-];
+export type LanguageOptions =
+  | { type: "swift" }
+  | { type: "cfamily"; includePath?: string }
+  | { type: "mixed"; cIncludePath?: string };
+export type LanguageType = LanguageOptions["type"];
+export const allLanguageTypes: LanguageType[] = ["swift", "cfamily", "mixed"];
 
 /* Public */
 
@@ -35,7 +29,7 @@ export type Config = {
   name: string;
   platforms: PlatformWithVersion<Platform>[];
   productType: ProductType;
-  language: LanguageOption;
+  language: LanguageOptions;
   minimumSwiftVersion: SwiftVersion;
   includeTests: boolean;
 };

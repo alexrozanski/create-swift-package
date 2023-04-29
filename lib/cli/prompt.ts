@@ -4,9 +4,10 @@ import prompts, { type Choice, type PromptObject } from "prompts";
 import { z } from "zod";
 import {
   Config,
-  LanguageOption,
+  LanguageOptions,
+  LanguageType,
   PlatformWithVersion,
-  allLanguageOptions,
+  allLanguageTypes,
 } from "../config";
 import {
   Platform,
@@ -77,6 +78,38 @@ const platformVersionChoices = (
         disabled: deprecated || notAvailableYet,
       };
     });
+};
+
+const productTypeChoices = (): Choice[] => {
+  return allProductTypes.map((productType) => ({
+    title: (() => {
+      switch (productType) {
+        case "library":
+          return "Library";
+        case "executable":
+          return "Executable";
+        case "plugin":
+          return "Plugin";
+      }
+    })(),
+    value: productType,
+  }));
+};
+
+const languageChoices = (): Choice[] => {
+  return allLanguageTypes.map((languageType) => ({
+    title: (() => {
+      switch (languageType) {
+        case "swift":
+          return "Swift";
+        case "cfamily":
+          return "C/Objective-C/C++";
+        case "mixed":
+          return "Mixed";
+      }
+    })(),
+    value: languageType,
+  }));
 };
 
 /* Prompts */
@@ -159,50 +192,54 @@ const promptPlatformVersions = async (
   return platformVersions;
 };
 
+const promptCIncludePath = async (
+  language: LanguageType
+): Promise<LanguageOptions> => {
+  switch (language) {
+    case "cfamily":
+    case "mixed": {
+      const headerPathResponse = await prompts({
+        type: "text",
+        name: "headerPath",
+        message:
+          "Where do you want to locate your C/Objective-C/C++ header files?",
+        initial: "include",
+      });
+
+      const path = z.string().parse(headerPathResponse.headerPath);
+      return language === "cfamily"
+        ? { type: language, includePath: path }
+        : { type: language, cIncludePath: path };
+    }
+    case "swift":
+      return { type: "swift" };
+  }
+};
+
 const promptTargetConfig = async () => {
   const response = await prompts([
     {
       type: "select",
       name: "productType",
       message: "What does your package output?",
-      choices: allProductTypes.map((productType) => ({
-        title: (() => {
-          switch (productType) {
-            case "library":
-              return "Library";
-            case "executable":
-              return "Executable";
-            case "plugin":
-              return "Plugin";
-          }
-        })(),
-        value: productType,
-      })),
+      choices: productTypeChoices(),
     },
     {
       type: "select",
       name: "language",
       message: "What languages does your target use?",
-      choices: allLanguageOptions.map((languageOption) => ({
-        title: (() => {
-          switch (languageOption) {
-            case "swift":
-              return "Swift";
-            case "cfamily":
-              return "C/Objective-C/C++";
-            case "mixed":
-              return "Mixed";
-          }
-        })(),
-        value: languageOption,
-      })),
+      choices: languageChoices(),
     },
   ]);
 
   const productType = ProductType.parse(response.productType);
-  const language = LanguageOption.parse(response.language);
+  const language = z
+    .union([z.literal("swift"), z.literal("cfamily"), z.literal("mixed")])
+    .parse(response.language);
 
-  return { productType, language };
+  const languageOptions = await promptCIncludePath(language);
+
+  return { productType, language: languageOptions };
 };
 
 const promptMiscConfig = async () => {

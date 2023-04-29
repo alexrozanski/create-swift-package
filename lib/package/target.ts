@@ -63,7 +63,7 @@ export const makeTargets = (config: Config): Target[] => {
 
   const mainName = mainTargetName(config);
   let mainTarget: Target;
-  switch (config.language) {
+  switch (config.language.type) {
     case "cfamily":
       mainTarget = makeMainTarget(mainName, "cfamily");
       targets.push(mainTarget);

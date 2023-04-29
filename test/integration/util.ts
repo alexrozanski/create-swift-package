@@ -1,9 +1,6 @@
 import tmp from "tmp";
-import { type Config } from "../../lib/config";
-import { createPackage } from "../../lib/package/create";
-import { makeTargets } from "../../lib/package/target";
 
-export const createPackageInTemporaryDirectory = async (config: Config) => {
+export const makeTemporaryDirectory = async () => {
   const { path, remove } = await new Promise<{
     path: string;
     remove: () => void;
@@ -15,11 +12,6 @@ export const createPackageInTemporaryDirectory = async (config: Config) => {
         resolve({ path, remove });
       }
     });
-  });
-
-  await createPackage({
-    config,
-    targets: makeTargets(config),
   });
 
   return { path, remove };

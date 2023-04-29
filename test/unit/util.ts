@@ -1,4 +1,4 @@
-import { Config, type LanguageOption } from "../../lib/config";
+import { Config } from "../../lib/config";
 import { ProductType } from "../../lib/swift/types";
 
 export const makeConfig = (props: {
