@@ -5,7 +5,7 @@ export type TargetFile = {
   path: string; // Relative path of the file within the target's folder
   template: string; // Relative path to the template in `templates`
 };
-type TargetRole = "main" | "other" | "test";
+type TargetRole = "main" | "supporting" | "test";
 export type TargetLanguage = "swift" | "cfamily";
 
 export type Target = {
@@ -76,14 +76,14 @@ const makeMainTarget = (
   }),
 });
 
-const makeOtherTarget = (
+const makeSupportingTarget = (
   name: string,
   language: TargetLanguage,
   dependencies: Target[],
   config: Config
 ): Target => ({
   name,
-  role: "other",
+  role: "supporting",
   language,
   dependencies,
   files: makeFiles(name, language, config, {
@@ -120,7 +120,7 @@ export const makeTargets = (config: Config): Target[] => {
       targets.push(mainTarget);
       break;
     case "mixed":
-      const objCxx = makeOtherTarget(
+      const objCxx = makeSupportingTarget(
         `${mainName}ObjCxx`,
         "cfamily",
         [],

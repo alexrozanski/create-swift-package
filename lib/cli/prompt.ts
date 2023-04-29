@@ -147,7 +147,17 @@ const promptInitialConfig = async (projectDir?: string) => {
     choices: minimumVersionChoices(),
   });
 
-  const response = await prompts(questions);
+  let cancelled = false;
+  const response = await prompts(questions, {
+    onCancel: () => {
+      cancelled = true;
+    },
+  });
+
+  if (cancelled) {
+    return { name: null, minimumSwiftVersion: null };
+  }
+
   const pathComponents = (projectDir || process.cwd()).split("/");
 
   return {
@@ -157,16 +167,28 @@ const promptInitialConfig = async (projectDir?: string) => {
 };
 
 const promptPlatforms = async () => {
-  const response = await prompts({
-    type: "multiselect",
-    name: "platforms",
-    message: "Which platforms does your package support?",
-    choices: allPlatforms.map((platform) => ({
-      title: platform.name,
-      value: platform.id,
-    })),
-    min: 1,
-  });
+  let cancelled = false;
+  const response = await prompts(
+    {
+      type: "multiselect",
+      name: "platforms",
+      message: "Which platforms does your package support?",
+      choices: allPlatforms.map((platform) => ({
+        title: platform.name,
+        value: platform.id,
+      })),
+      min: 1,
+    },
+    {
+      onCancel: () => {
+        cancelled = true;
+      },
+    }
+  );
+
+  if (cancelled) {
+    return null;
+  }
 
   const platforms = z
     .array(
@@ -194,13 +216,25 @@ const promptPlatformVersions = async (
       minimumSwiftVersion
     );
     if (platformInfo != null) {
-      const response = await prompts({
-        type: "select",
-        name: "version",
-        message: `Which minimum ${platformInfo.name} version do you want to support?`,
-        initial,
-        choices,
-      });
+      let cancelled = false;
+      const response = await prompts(
+        {
+          type: "select",
+          name: "version",
+          message: `Which minimum ${platformInfo.name} version do you want to support?`,
+          initial,
+          choices,
+        },
+        {
+          onCancel: () => {
+            cancelled = true;
+          },
+        }
+      );
+
+      if (cancelled) {
+        return null;
+      }
 
       platformVersions.push({
         platform: platformId,
@@ -214,17 +248,29 @@ const promptPlatformVersions = async (
 
 const promptCIncludePath = async (
   language: LanguageType
-): Promise<LanguageOptions> => {
+): Promise<LanguageOptions | null> => {
   switch (language) {
     case "cfamily":
     case "mixed": {
-      const headerPathResponse = await prompts({
-        type: "text",
-        name: "headerPath",
-        message:
-          "Where do you want to locate your C/Objective-C/C++ header files?",
-        initial: "include",
-      });
+      let cancelled = false;
+      const headerPathResponse = await prompts(
+        {
+          type: "text",
+          name: "headerPath",
+          message:
+            "Where do you want to locate your C/Objective-C/C++ header files?",
+          initial: "include",
+        },
+        {
+          onCancel: () => {
+            cancelled = true;
+          },
+        }
+      );
+
+      if (cancelled) {
+        return null;
+      }
 
       const path = z.string().parse(headerPathResponse.headerPath);
       return language === "cfamily"
@@ -237,20 +283,32 @@ const promptCIncludePath = async (
 };
 
 const promptTargetConfig = async () => {
-  const response = await prompts([
+  let cancelled = false;
+  const response = await prompts(
+    [
+      {
+        type: "select",
+        name: "productType",
+        message: "What does your package output?",
+        choices: productTypeChoices(),
+      },
+      {
+        type: "select",
+        name: "language",
+        message: "What languages does your target use?",
+        choices: languageChoices(),
+      },
+    ],
     {
-      type: "select",
-      name: "productType",
-      message: "What does your package output?",
-      choices: productTypeChoices(),
-    },
-    {
-      type: "select",
-      name: "language",
-      message: "What languages does your target use?",
-      choices: languageChoices(),
-    },
-  ]);
+      onCancel: () => {
+        cancelled = true;
+      },
+    }
+  );
+
+  if (cancelled) {
+    return null;
+  }
 
   const productType = ProductType.parse(response.productType);
   const language = z
@@ -258,19 +316,34 @@ const promptTargetConfig = async () => {
     .parse(response.language);
 
   const languageOptions = await promptCIncludePath(language);
+  if (languageOptions == null) {
+    return null;
+  }
 
   return { productType, language: languageOptions };
 };
 
 const promptMiscConfig = async () => {
-  const response = await prompts({
-    type: "toggle",
-    name: "includeTests",
-    message: "Include tests?",
-    active: "Yes",
-    inactive: "No",
-    initial: true,
-  });
+  let cancelled = false;
+  const response = await prompts(
+    {
+      type: "toggle",
+      name: "includeTests",
+      message: "Include tests?",
+      active: "Yes",
+      inactive: "No",
+      initial: true,
+    },
+    {
+      onCancel: () => {
+        cancelled = true;
+      },
+    }
+  );
+
+  if (cancelled) {
+    return null;
+  }
 
   const includeTests = z.boolean().parse(response.includeTests);
 
@@ -296,12 +369,19 @@ export const promptConfig = async (
     platforms,
     minimumSwiftVersion
   );
-  if (platformConfig.length == null) {
+  if (platformConfig == null) {
     return null;
   }
 
   const targetConfig = await promptTargetConfig();
+  if (targetConfig == null) {
+    return null;
+  }
+
   const miscConfig = await promptMiscConfig();
+  if (miscConfig == null) {
+    return null;
+  }
 
   return {
     projectDir:
