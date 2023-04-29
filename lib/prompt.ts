@@ -42,7 +42,7 @@ const promptInitialConfig = async (projectDir?: string) => {
   });
 
   const response = await prompts(questions);
-  const pathComponents = (projectDir || "").split("/");
+  const pathComponents = (projectDir || process.cwd()).split("/");
 
   return {
     name: response.name || pathComponents[pathComponents.length - 1],
@@ -192,7 +192,7 @@ const promptMiscConfig = async () => {
 };
 
 export const promptConfig = async (
-  projectDir: string
+  projectDir?: string
 ): Promise<Config | null> => {
   const { name, minimumSwiftVersion } = await promptInitialConfig(projectDir);
   if (minimumSwiftVersion == null) {
@@ -216,7 +216,7 @@ export const promptConfig = async (
   const miscConfig = await promptMiscConfig();
 
   return {
-    projectDir,
+    projectDir: projectDir || `${process.cwd()}/${name}`,
     name,
     platforms: platformConfig,
     minimumSwiftVersion,

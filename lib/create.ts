@@ -2,11 +2,15 @@ import fs from "fs";
 import { type Config } from "./config";
 import { packageString } from "./package";
 
-export const createPackage = (outputDir: string, config: Config) => {
+export const createPackage = (config: Config) => {
   const packageFile = packageString(config);
 
+  if (!fs.existsSync(config.projectDir)) {
+    fs.mkdirSync(config.projectDir);
+  }
+
   try {
-    fs.writeFileSync(`${outputDir}/Package.swift`, packageFile);
+    fs.writeFileSync(`${config.projectDir}/Package.swift`, packageFile);
   } catch (err) {
     console.error(err);
   }

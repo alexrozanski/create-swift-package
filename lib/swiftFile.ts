@@ -144,6 +144,7 @@ export const write = (swiftFile: SwiftFile) => {
   });
 
   writer.appendLine();
+  writer.appendLine();
 
   swiftFile.globalDeclarations.forEach((declaration) => {
     const { type: symbolType, name, initializer } = declaration;
