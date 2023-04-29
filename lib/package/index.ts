@@ -1,17 +1,12 @@
-import { Config } from "./config";
-import {
-  arg,
-  decl,
-  init,
-  write,
-  type SwiftFile,
-  type Value,
-} from "./swiftFile";
+import { Config } from "../config";
+import { arg, decl, init, type SwiftFile, type Value } from "../swift/file";
 import { type Target } from "./target";
 
+// This works for now -- might need some additional logic later
 const platformVersion = (minimumVersion: string) => {
   const components = minimumVersion
     .split(".")
+    // e.g. 13.0 always maps to v13
     .filter((component) => Number(component) !== 0);
   return `.v${components.join("_")}`;
 };
@@ -36,7 +31,7 @@ const product = (config: Config): Value => {
   }
 };
 
-const packageFile = (config: Config, targets: Target[]): SwiftFile => {
+export const packageFile = (config: Config, targets: Target[]): SwiftFile => {
   return {
     headerComment: `swift-tools-version: ${config.minimumSwiftVersion}`,
     importedModules: ["PackageDescription"],
@@ -72,8 +67,4 @@ const packageFile = (config: Config, targets: Target[]): SwiftFile => {
       ),
     ],
   };
-};
-
-export const packageString = (config: Config, targets: Target[]) => {
-  return write(packageFile(config, targets));
 };

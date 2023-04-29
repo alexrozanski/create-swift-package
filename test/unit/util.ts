@@ -1,5 +1,5 @@
 import { Config, type LanguageOption } from "../../lib/config";
-import { ProductType } from "../../lib/swift";
+import { ProductType } from "../../lib/swift/types";
 
 export const makeConfig = (props: {
   name: string;

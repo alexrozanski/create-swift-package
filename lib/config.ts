@@ -4,8 +4,13 @@ import {
   type Platform,
   type PlatformVersion,
   type ProductType,
-} from "./swift";
+} from "./swift/types";
 
+/**
+ * Additional config types
+ *
+ * These aren't directly related to values in Package.swift itself.
+ */
 export type PlatformWithVersion<P extends Platform> = {
   platform: Platform;
   minimumVersion: PlatformVersion<P>;
@@ -22,6 +27,8 @@ export const allLanguageOptions: LanguageOption[] = [
   "cfamily",
   "mixed",
 ];
+
+/* Public */
 
 export type Config = {
   projectDir: string;

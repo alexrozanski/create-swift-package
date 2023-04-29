@@ -1,48 +1,102 @@
 import chalk from "chalk";
 import path from "path";
-import prompts, { PromptObject } from "prompts";
+import prompts, { type Choice, type PromptObject } from "prompts";
 import { z } from "zod";
 import {
   Config,
   LanguageOption,
   PlatformWithVersion,
   allLanguageOptions,
-} from "./config";
+} from "../config";
 import {
   Platform,
   ProductType,
+  SwiftVersion,
   allPlatforms,
   allProductTypes,
   allSwiftVersions,
   getPlatformInfo,
-} from "./swift";
-import { greaterThanOrEqual, lessThan, versionCompareMapFn } from "./version";
+  type PlatformInfo,
+  type PlatformVersionInfo,
+} from "../swift/types";
+import { sanitizedDirectory } from "../util/fs";
+import {
+  greaterThanOrEqual,
+  lessThan,
+  versionCompareMapFn,
+} from "../util/version";
 
-const promptInitialConfig = async (projectDir?: string) => {
-  const nameQuestion: PromptObject = {
-    type: "text",
-    name: "name",
-    message: "What is your package named?",
-    initial: "my-package",
+/* Util */
+
+const minimumVersionChoices = (): Choice[] => {
+  return allSwiftVersions
+    .sort(versionCompareMapFn((v) => v.version))
+    .map((version) => ({
+      title: `${version.version} ${chalk.gray(
+        `(Released ${version.releaseDate.toLocaleDateString()})`
+      )}`,
+      value: version.version,
+    }));
+};
+
+// Handle versions for each platform including which Swift version they were introduced for
+// and which version they may have been deprecated in.
+const platformVersionChoices = (
+  platformInfo: PlatformInfo<Platform>,
+  minimumSwiftVersion: SwiftVersion
+): Choice[] => {
+  const title = (
+    version: PlatformVersionInfo,
+    deprecated: boolean,
+    notAvailableYet: boolean
+  ) => {
+    if (deprecated && version.deprecated) {
+      return `${version.version} ${chalk.gray(
+        `(Deprecated by Swift tools ${version.deprecated})`
+      )}`;
+    } else if (notAvailableYet) {
+      return `${version.version} ${chalk.gray(
+        `(Available from Swift tools ${version.introduced})`
+      )}`;
+    } else {
+      return version.version;
+    }
   };
 
+  return platformInfo.versions
+    .sort(versionCompareMapFn((v) => v.version))
+    .map((version) => {
+      const deprecated =
+        version.deprecated != null &&
+        greaterThanOrEqual(minimumSwiftVersion, version.deprecated);
+      const notAvailableYet = lessThan(minimumSwiftVersion, version.introduced);
+
+      return {
+        title: title(version, deprecated, notAvailableYet),
+        value: version.version,
+        disabled: deprecated || notAvailableYet,
+      };
+    });
+};
+
+/* Prompts */
+
+const promptInitialConfig = async (projectDir?: string) => {
   let questions: PromptObject[] = [];
   if (projectDir == null) {
-    questions.push(nameQuestion);
+    questions.push({
+      type: "text",
+      name: "name",
+      message: "What is your package named?",
+      initial: "my-package",
+    });
   }
 
   questions.push({
     type: "select",
     name: "minimumSwiftVersion",
     message: "Which version of Swift does your package target?",
-    choices: allSwiftVersions
-      .sort(versionCompareMapFn((v) => v.version))
-      .map((version) => ({
-        title: `${version.version} ${chalk.gray(
-          `(Released ${version.releaseDate.toLocaleDateString()})`
-        )}`,
-        value: version.version,
-      })),
+    choices: minimumVersionChoices(),
   });
 
   const response = await prompts(questions);
@@ -81,7 +135,7 @@ const promptPlatforms = async () => {
 
 const promptPlatformVersions = async (
   platforms: Platform[],
-  minimumSwiftVersion: string
+  minimumSwiftVersion: SwiftVersion
 ) => {
   const platformVersions: PlatformWithVersion<Platform>[] = [];
 
@@ -92,36 +146,7 @@ const promptPlatformVersions = async (
         type: "select",
         name: "version",
         message: `Which minimum ${platformInfo.name} version do you want to support?`,
-        choices: platformInfo.versions
-          .sort(versionCompareMapFn((v) => v.version))
-          .map((version) => {
-            const deprecated =
-              version.deprecated != null &&
-              greaterThanOrEqual(minimumSwiftVersion, version.deprecated);
-            const notAvailableYet = lessThan(
-              minimumSwiftVersion,
-              version.introduced
-            );
-
-            let title: string;
-            if (deprecated && version.deprecated) {
-              title = `${version.version} ${chalk.gray(
-                `(Deprecated by Swift tools ${version.deprecated})`
-              )}`;
-            } else if (notAvailableYet) {
-              title = `${version.version} ${chalk.gray(
-                `(Available from Swift tools ${version.introduced})`
-              )}`;
-            } else {
-              title = version.version;
-            }
-
-            return {
-              title,
-              value: version.version,
-              disabled: deprecated || notAvailableYet,
-            };
-          }),
+        choices: platformVersionChoices(platformInfo, minimumSwiftVersion),
       });
 
       platformVersions.push({
@@ -195,16 +220,7 @@ const promptMiscConfig = async () => {
   return { includeTests };
 };
 
-const sanitizedDirectory = (filePath: string) => {
-  const fileName = path.basename(filePath);
-  const dirName = path.dirname(filePath);
-
-  const sanitizedFileName = fileName
-    .replace(/[^a-zA-Z0-9._-]+/g, "-")
-    .replace(/_+/g, "-");
-
-  return path.join(dirName, sanitizedFileName);
-};
+/* Public */
 
 export const promptConfig = async (
   projectDir?: string

@@ -3,9 +3,9 @@
 import chalk from "chalk";
 import { exit } from "process";
 import { parse } from "./lib/cli";
-import { createPackage } from "./lib/create";
-import { promptConfig } from "./lib/prompt";
-import { makeTargets } from "./lib/target";
+import { promptConfig } from "./lib/cli/prompt";
+import { createPackage } from "./lib/package/create";
+import { makeTargets } from "./lib/package/target";
 import packageJson from "./package.json";
 
 const cli = parse(process.argv, packageJson);

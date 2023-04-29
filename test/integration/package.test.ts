@@ -2,7 +2,7 @@ import { exec } from "child_process";
 import fs from "fs";
 import path from "path";
 import tmp, { DirResult } from "tmp";
-import { createPackage } from "../../lib/create";
+import { createPackage } from "../../lib/package/create";
 
 describe("Package integration tests", () => {
   let tmpDir: DirResult;

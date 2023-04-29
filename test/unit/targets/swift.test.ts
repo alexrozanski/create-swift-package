@@ -1,5 +1,5 @@
 import { type Config } from "../../../lib/config";
-import { makeTargets } from "../../../lib/target";
+import { makeTargets } from "../../../lib/package/target";
 import { makeConfig } from "../util";
 
 describe("Swift target unit tests", () => {

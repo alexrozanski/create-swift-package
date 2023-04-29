@@ -1,4 +1,4 @@
-import { Config } from "./config";
+import { Config } from "../config";
 
 type TargetFile = {
   path: string; // Relative path of the file within the target's folder
@@ -15,6 +15,8 @@ export type Target = {
   files: TargetFile[];
 };
 
+/* Helpers */
+
 const mainTargetName = (config: Config) => {
   return config.name
     .replace(/[^a-zA-Z0-9\s]/g, " ")
@@ -22,61 +24,64 @@ const mainTargetName = (config: Config) => {
     .replace(/\s+/g, "");
 };
 
+const makeMainTarget = (
+  mainName: string,
+  language: TargetLanguage,
+  dependencies: Target[] = []
+): Target => ({
+  name: mainName,
+  role: "main",
+  language,
+  dependencies,
+  files: [],
+});
+
+const makeOtherTarget = (
+  name: string,
+  language: TargetLanguage,
+  dependencies: Target[] = []
+): Target => ({
+  name,
+  role: "other",
+  language,
+  dependencies,
+  files: [],
+});
+
+const makeTestTarget = (name: string, mainTarget: Target): Target => ({
+  name,
+  role: "test",
+  language: mainTarget.language,
+  dependencies: [mainTarget],
+  files: [],
+});
+
+/* Public */
+
 export const makeTargets = (config: Config): Target[] => {
   const targets: Target[] = [];
 
   const mainName = mainTargetName(config);
   let mainTarget: Target;
-
   switch (config.language) {
     case "cfamily":
-      mainTarget = {
-        name: mainName,
-        role: "main",
-        language: "cfamily",
-        dependencies: [],
-        files: [],
-      };
+      mainTarget = makeMainTarget(mainName, "cfamily");
       targets.push(mainTarget);
       break;
     case "swift":
-      mainTarget = {
-        name: mainName,
-        role: "main",
-        language: "swift",
-        dependencies: [],
-        files: [],
-      };
+      mainTarget = makeMainTarget(mainName, "swift");
       targets.push(mainTarget);
       break;
     case "mixed":
-      const objCxx: Target = {
-        name: `${mainName}ObjCxx`,
-        role: "other",
-        language: "cfamily",
-        dependencies: [],
-        files: [],
-      };
-      mainTarget = {
-        name: mainName,
-        role: "main",
-        language: "swift",
-        dependencies: [objCxx],
-        files: [],
-      };
+      const objCxx = makeOtherTarget(`${mainName}ObjCxx`, "cfamily");
+      mainTarget = makeMainTarget(mainName, "swift", [objCxx]);
       targets.push(mainTarget);
       targets.push(objCxx);
       break;
   }
 
   if (config.includeTests) {
-    targets.push({
-      name: `${mainName}Tests`,
-      role: "test",
-      language: mainTarget.language,
-      dependencies: [mainTarget],
-      files: [],
-    });
+    targets.push(makeTestTarget(`${mainName}Tests`, mainTarget));
   }
 
   return targets;

@@ -1,6 +1,12 @@
 import { z } from "zod";
-import { platforms } from "../data/platforms";
-import { swiftVersions } from "../data/swift";
+import { platforms } from "../../data/platforms";
+import { swiftVersions } from "../../data/swift";
+
+/**
+ * Swift types.
+ *
+ * Exposes types used in Swift package definitions like Platform, version etc.
+ */
 
 /* Platform */
 
@@ -9,10 +15,15 @@ export type Platform = keyof typeof platforms;
 export type PlatformVersion<P extends Platform> =
   (typeof platforms)[P]["versions"][number]["version"];
 
+export type PlatformVersionInfo = {
+  version: string;
+  introduced: string; // Version of Swift this was introduced in
+  deprecated?: string; // Version of Swift this was deprecated in
+};
 export type PlatformInfo<P extends Platform> = {
   id: P;
   name: string;
-  versions: { version: string; introduced: string; deprecated?: string }[];
+  versions: PlatformVersionInfo[];
 };
 
 const platformInfo = (platform: Platform) => ({
