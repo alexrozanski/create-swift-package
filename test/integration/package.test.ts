@@ -28,6 +28,7 @@ describe("Package integration tests", () => {
     await createPackage({
       config,
       targets: makeTargets(config),
+      options: { interactive: false, quiet: true },
     });
   });
 

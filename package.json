@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "esbuild index.ts --bundle --outdir=dist --platform=node --watch --loader:.mustache=text",
-    "test": "jest",
-    "unit": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/unit\""
+    "test": "npm run unit && npm run integration",
+    "unit": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/unit\"",
+    "integration": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/integration\""
   },
   "keywords": [
     "swift",
@@ -25,6 +26,7 @@
     "zod": "^3.21.4"
   },
   "devDependencies": {
+    "@glen/jest-raw-loader": "^2.0.0",
     "@types/jest": "^29.5.1",
     "@types/lodash": "^4.14.194",
     "@types/mustache": "^4.2.2",

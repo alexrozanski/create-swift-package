@@ -121,13 +121,13 @@ const makeDirectoryStructure = (
 export const createPackage = async (props: {
   config: Config;
   targets: Target[];
-  options?: { dryRun?: boolean };
+  options?: { dryRun?: boolean; interactive?: boolean; quiet?: boolean };
 }) => {
   const { config, targets, options } = props;
   const description = makePackageDescription(config, targets);
   const file = packageFile(description);
 
-  const dryRun = !!options?.dryRun;
+  const { dryRun = false, interactive = true, quiet = false } = options || {};
 
   if (!dryRun) {
     const dirExists = await exists(config.projectDir);
@@ -156,26 +156,32 @@ export const createPackage = async (props: {
     }
   }
 
-  if (dryRun) {
+  if (!quiet) {
+    if (dryRun) {
+      console.log(
+        `\nPackage would be created at ${chalk.bold(config.projectDir)}`
+      );
+      console.log(chalk.gray("-  Rerun without `--dry-run` to create\n"));
+    } else {
+      console.log(
+        chalk.green(
+          `\nPackage successfully created at ${chalk.bold(
+            config.projectDir
+          )}}:\n`
+        )
+      );
+    }
+  }
+
+  if (!quiet) {
     console.log(
-      `\nPackage would be created at ${chalk.bold(config.projectDir)}`
-    );
-    console.log(chalk.gray("-  Rerun without `--dry-run` to create\n"));
-  } else {
-    console.log(
-      chalk.green(
-        `\nPackage successfully created at ${chalk.bold(config.projectDir)}}:\n`
+      formatDirectoryTree(
+        makeDirectoryStructure(config, packageFiles(config, targets))
       )
     );
   }
 
-  console.log(
-    formatDirectoryTree(
-      makeDirectoryStructure(config, packageFiles(config, targets))
-    )
-  );
-
-  if (!dryRun) {
+  if (!dryRun && interactive) {
     const response = await prompts({
       type: "toggle",
       name: "open",

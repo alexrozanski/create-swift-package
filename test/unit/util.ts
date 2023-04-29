@@ -16,5 +16,6 @@ export const makeConfig = (props: {
     language: language,
     minimumSwiftVersion: "5.4",
     includeTests: includeTests,
+    initGitRepo: false,
   };
 };

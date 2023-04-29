@@ -19,7 +19,11 @@ const cli = parse(process.argv, packageJson);
 
   try {
     const targets = makeTargets(config);
-    await createPackage({ config, targets, cli });
+    await createPackage({
+      config,
+      targets,
+      options: { dryRun: cli.dryRun, interactive: true },
+    });
   } catch (err) {
     console.error(
       chalk.red(`Couldn't create package: ${(err as Error).message}`)
