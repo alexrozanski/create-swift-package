@@ -59,22 +59,14 @@ export const allSwiftVersions: SwiftVersionInfo[] = swiftVersions
 
 /* Targets */
 
-export const TargetType = z.union([
+export const ProductType = z.union([
   z.literal("library"),
   z.literal("executable"),
   z.literal("plugin"),
 ]);
-export type TargetType = z.TypeOf<typeof TargetType>;
-export const allTargetTypes: TargetType[] = ["library", "executable", "plugin"];
-
-export const TargetLanguage = z.union([
-  z.literal("swift"),
-  z.literal("cfamily"),
-  z.literal("mixed"),
-]);
-export type TargetLanguage = z.TypeOf<typeof TargetLanguage>;
-export const allTargetLanguages: TargetLanguage[] = [
-  "swift",
-  "cfamily",
-  "mixed",
+export type ProductType = z.TypeOf<typeof ProductType>;
+export const allProductTypes: ProductType[] = [
+  "library",
+  "executable",
+  "plugin",
 ];

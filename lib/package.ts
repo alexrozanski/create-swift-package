@@ -16,7 +16,7 @@ const platformVersion = (minimumVersion: string) => {
 };
 
 const product = (config: Config): Value => {
-  switch (config.targetType) {
+  switch (config.productType) {
     case "library":
       return init(".library", [
         arg("name", config.name),

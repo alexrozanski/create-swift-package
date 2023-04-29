@@ -1,15 +1,18 @@
 import chalk from "chalk";
 import prompts, { PromptObject } from "prompts";
 import { z } from "zod";
-import { Config, PlatformWithVersion } from "./config";
+import {
+  Config,
+  LanguageOption,
+  PlatformWithVersion,
+  allLanguageOptions,
+} from "./config";
 import {
   Platform,
-  TargetLanguage,
-  TargetType,
+  ProductType,
   allPlatforms,
+  allProductTypes,
   allSwiftVersions,
-  allTargetLanguages,
-  allTargetTypes,
   getPlatformInfo,
 } from "./swift";
 import { greaterThanOrEqual, lessThan, versionCompareMapFn } from "./version";
@@ -134,11 +137,11 @@ const promptTargetConfig = async () => {
   const response = await prompts([
     {
       type: "select",
-      name: "targetType",
+      name: "productType",
       message: "What does your package output?",
-      choices: allTargetTypes.map((target) => ({
+      choices: allProductTypes.map((productType) => ({
         title: (() => {
-          switch (target) {
+          switch (productType) {
             case "library":
               return "Library";
             case "executable":
@@ -147,16 +150,16 @@ const promptTargetConfig = async () => {
               return "Plugin";
           }
         })(),
-        value: target,
+        value: productType,
       })),
     },
     {
       type: "select",
       name: "language",
       message: "What languages does your target use?",
-      choices: allTargetLanguages.map((targetLanguage) => ({
+      choices: allLanguageOptions.map((languageOption) => ({
         title: (() => {
-          switch (targetLanguage) {
+          switch (languageOption) {
             case "swift":
               return "Swift";
             case "cfamily":
@@ -165,15 +168,15 @@ const promptTargetConfig = async () => {
               return "Mixed";
           }
         })(),
-        value: targetLanguage,
+        value: languageOption,
       })),
     },
   ]);
 
-  const targetType = TargetType.parse(response.targetType);
-  const targetLanguage = TargetLanguage.parse(response.language);
+  const productType = ProductType.parse(response.productType);
+  const language = LanguageOption.parse(response.language);
 
-  return { targetType, targetLanguage };
+  return { productType, language };
 };
 
 const promptMiscConfig = async () => {
