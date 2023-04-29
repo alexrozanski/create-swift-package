@@ -1,6 +1,6 @@
 import { Config } from "../config";
 
-type TargetFile = {
+export type TargetFile = {
   path: string; // Relative path of the file within the target's folder
   template: string; // Relative path to the template in `templates`
 };

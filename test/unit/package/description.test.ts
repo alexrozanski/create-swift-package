@@ -8,7 +8,7 @@ describe("Package description unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "library",
-      language: "swift",
+      language: { type: "swift" },
       includeTests: false,
     });
     const targets = makeTargets(config);
@@ -23,7 +23,7 @@ describe("Package description unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "library",
-      language: "swift",
+      language: { type: "swift" },
       includeTests: false,
     });
     const targets = makeTargets(config);
@@ -38,7 +38,7 @@ describe("Package description unit tests", () => {
     const config: Config = makeConfig({
       name: "test-package",
       productType: "library",
-      language: "swift",
+      language: { type: "swift" },
       includeTests: false,
     });
     const targets = makeTargets(config);
@@ -52,7 +52,7 @@ describe("Package description unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "library",
-      language: "swift",
+      language: { type: "swift" },
       includeTests: false,
     });
     const targets = makeTargets(config);
@@ -67,7 +67,7 @@ describe("Package description unit tests", () => {
     const config: Config = makeConfig({
       name: "test-package",
       productType: "library",
-      language: "swift",
+      language: { type: "swift" },
       includeTests: false,
     });
     const targets = makeTargets(config);

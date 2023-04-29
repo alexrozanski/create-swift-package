@@ -7,7 +7,7 @@ describe("C-family target unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "library",
-      language: "cfamily",
+      language: { type: "cfamily" },
       includeTests: false,
     });
     const targets = makeTargets(config);
@@ -19,7 +19,7 @@ describe("C-family target unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "library",
-      language: "cfamily",
+      language: { type: "cfamily" },
       includeTests: true,
     });
     const targets = makeTargets(config);
@@ -34,7 +34,7 @@ describe("C-family target unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "executable",
-      language: "cfamily",
+      language: { type: "cfamily" },
       includeTests: false,
     });
     const targets = makeTargets(config);
@@ -46,7 +46,7 @@ describe("C-family target unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "executable",
-      language: "cfamily",
+      language: { type: "cfamily" },
       includeTests: true,
     });
     const targets = makeTargets(config);
@@ -61,7 +61,7 @@ describe("C-family target unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "plugin",
-      language: "cfamily",
+      language: { type: "cfamily" },
       includeTests: false,
     });
     const targets = makeTargets(config);
@@ -73,7 +73,7 @@ describe("C-family target unit tests", () => {
     const config: Config = makeConfig({
       name: "TestPackage",
       productType: "executable",
-      language: "cfamily",
+      language: { type: "cfamily" },
       includeTests: true,
     });
     const targets = makeTargets(config);
