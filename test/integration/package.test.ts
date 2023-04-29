@@ -23,6 +23,7 @@ describe("Package integration tests", () => {
       language: { type: "swift" },
       minimumSwiftVersion: "5.7",
       includeTests: true,
+      initGitRepo: false,
     };
     await createPackage({
       config,

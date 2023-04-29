@@ -146,7 +146,9 @@ export const createPackage = async (props: {
     );
   }
 
-  await Promise.all(targets.map((target) => writeTarget(config, target, cli)));
+  await Promise.all(
+    targets.map((target) => writeTarget(config, target, options))
+  );
 
   if (!dryRun) {
     if (config.initGitRepo) {
