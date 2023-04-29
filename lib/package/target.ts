@@ -1,4 +1,5 @@
-import { Config } from "../config";
+import path from "path";
+import { Config, LanguageOptions } from "../config";
 
 export type TargetFile = {
   path: string; // Relative path of the file within the target's folder
@@ -24,9 +25,21 @@ const mainTargetName = (config: Config) => {
     .replace(/\s+/g, "");
 };
 
+const cIncludePath = (languageOptions: LanguageOptions) => {
+  switch (languageOptions.type) {
+    case "cfamily":
+      return languageOptions.includePath;
+    case "mixed":
+      return languageOptions.cIncludePath;
+    case "swift":
+      return null;
+  }
+};
+
 const makeFiles = (
   name: string,
   language: TargetLanguage,
+  config: Config,
   templates: {
     swiftTemplate: string;
     cxxTemplates: { header: string; implementation: string };
@@ -36,8 +49,9 @@ const makeFiles = (
   switch (language) {
     case "cfamily": {
       const { header, implementation } = cxxTemplates;
+      const headerPath = cIncludePath(config.language) || "include";
       return [
-        { path: `${name}.h`, template: header },
+        { path: path.join(headerPath, `${name}.h`), template: header },
         { path: `${name}.m`, template: implementation },
       ];
     }
@@ -49,13 +63,14 @@ const makeFiles = (
 const makeMainTarget = (
   mainName: string,
   language: TargetLanguage,
-  dependencies: Target[] = []
+  dependencies: Target[],
+  config: Config
 ): Target => ({
   name: mainName,
   role: "main",
   language,
   dependencies,
-  files: makeFiles(mainName, language, {
+  files: makeFiles(mainName, language, config, {
     swiftTemplate: "",
     cxxTemplates: { header: "", implementation: "" },
   }),
@@ -64,24 +79,25 @@ const makeMainTarget = (
 const makeOtherTarget = (
   name: string,
   language: TargetLanguage,
-  dependencies: Target[] = []
+  dependencies: Target[],
+  config: Config
 ): Target => ({
   name,
   role: "other",
   language,
   dependencies,
-  files: makeFiles(name, language, {
+  files: makeFiles(name, language, config, {
     swiftTemplate: "",
     cxxTemplates: { header: "", implementation: "" },
   }),
 });
 
-const makeTestTarget = (mainTarget: Target): Target => ({
+const makeTestTarget = (mainTarget: Target, config: Config): Target => ({
   name: `${mainTarget.name}Tests`,
   role: "test",
   language: mainTarget.language,
   dependencies: [mainTarget],
-  files: makeFiles(`${mainTarget.name}Tests`, mainTarget.language, {
+  files: makeFiles(`${mainTarget.name}Tests`, mainTarget.language, config, {
     swiftTemplate: "",
     cxxTemplates: { header: "", implementation: "" },
   }),
@@ -96,23 +112,28 @@ export const makeTargets = (config: Config): Target[] => {
   let mainTarget: Target;
   switch (config.language.type) {
     case "cfamily":
-      mainTarget = makeMainTarget(mainName, "cfamily");
+      mainTarget = makeMainTarget(mainName, "cfamily", [], config);
       targets.push(mainTarget);
       break;
     case "swift":
-      mainTarget = makeMainTarget(mainName, "swift");
+      mainTarget = makeMainTarget(mainName, "swift", [], config);
       targets.push(mainTarget);
       break;
     case "mixed":
-      const objCxx = makeOtherTarget(`${mainName}ObjCxx`, "cfamily");
-      mainTarget = makeMainTarget(mainName, "swift", [objCxx]);
+      const objCxx = makeOtherTarget(
+        `${mainName}ObjCxx`,
+        "cfamily",
+        [],
+        config
+      );
+      mainTarget = makeMainTarget(mainName, "swift", [objCxx], config);
       targets.push(mainTarget);
       targets.push(objCxx);
       break;
   }
 
   if (config.includeTests) {
-    targets.push(makeTestTarget(mainTarget));
+    targets.push(makeTestTarget(mainTarget, config));
   }
 
   return targets;
