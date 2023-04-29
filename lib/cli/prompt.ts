@@ -45,7 +45,7 @@ const minimumVersionChoices = (): Choice[] => {
 const platformVersionChoices = (
   platformInfo: PlatformInfo<Platform>,
   minimumSwiftVersion: SwiftVersion
-): Choice[] => {
+): { choices: Choice[]; initial: number } => {
   const title = (
     version: PlatformVersionInfo,
     deprecated: boolean,
@@ -64,7 +64,7 @@ const platformVersionChoices = (
     }
   };
 
-  return platformInfo.versions
+  const choicesWithVersionSupport = platformInfo.versions
     .sort(versionCompareMapFn((v) => v.version))
     .map((version) => {
       const deprecated =
@@ -73,11 +73,26 @@ const platformVersionChoices = (
       const notAvailableYet = lessThan(minimumSwiftVersion, version.introduced);
 
       return {
+        version,
+        deprecated,
+        notAvailableYet,
+      };
+    });
+
+  return {
+    choices: choicesWithVersionSupport.map((info) => {
+      const { version, deprecated, notAvailableYet } = info;
+
+      return {
         title: title(version, deprecated, notAvailableYet),
         value: version.version,
         disabled: deprecated || notAvailableYet,
       };
-    });
+    }),
+    initial: choicesWithVersionSupport.findIndex(
+      ({ deprecated, notAvailableYet }) => !deprecated && !notAvailableYet
+    ),
+  };
 };
 
 const productTypeChoices = (): Choice[] => {
@@ -174,12 +189,17 @@ const promptPlatformVersions = async (
 
   for (const platformId of platforms) {
     const platformInfo = getPlatformInfo(platformId);
+    const { choices, initial } = platformVersionChoices(
+      platformInfo,
+      minimumSwiftVersion
+    );
     if (platformInfo != null) {
       const response = await prompts({
         type: "select",
         name: "version",
         message: `Which minimum ${platformInfo.name} version do you want to support?`,
-        choices: platformVersionChoices(platformInfo, minimumSwiftVersion),
+        initial,
+        choices,
       });
 
       platformVersions.push({
