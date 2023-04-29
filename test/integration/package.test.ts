@@ -1,32 +1,14 @@
 import { exec } from "child_process";
 import path from "path";
-import tmp from "tmp";
 import { type Config } from "../../lib/config";
-import { createPackage } from "../../lib/package/create";
-import { makeTargets } from "../../lib/package/target";
 import { exists } from "../../lib/util/fs";
+import { createPackageInTemporaryDirectory } from "./util";
 
 describe("Package integration tests", () => {
   let tmpDir: string;
   let removeDir: () => void;
 
   beforeEach(async () => {
-    const { path, remove } = await new Promise<{
-      path: string;
-      remove: () => void;
-    }>((resolve, reject) => {
-      tmp.dir({ unsafeCleanup: true }, (err, path, remove) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve({ path, remove });
-        }
-      });
-    });
-
-    tmpDir = path;
-    removeDir = remove;
-
     const config: Config = {
       projectDir: tmpDir,
       name: "test",
@@ -36,11 +18,10 @@ describe("Package integration tests", () => {
       minimumSwiftVersion: "5.7",
       includeTests: true,
     };
+    const { path, remove } = await createPackageInTemporaryDirectory(config);
 
-    await createPackage({
-      config,
-      targets: makeTargets(config),
-    });
+    tmpDir = path;
+    removeDir = remove;
   });
 
   afterEach(() => removeDir());
@@ -54,7 +35,7 @@ describe("Package integration tests", () => {
     exec(
       "/usr/bin/env swift package dump-package",
       { cwd: tmpDir },
-      (error, stdout, stderr) => {
+      (error) => {
         try {
           expect(error).toBe(null);
           done();
