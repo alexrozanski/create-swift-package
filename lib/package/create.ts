@@ -4,6 +4,7 @@ import { packageFile } from ".";
 import { type Config } from "../config";
 import { writeSwiftFile } from "../swift/file";
 import { canWrite, exists } from "../util/fs";
+import { makePackageDescription } from "./description";
 import { type Target } from "./target";
 
 const writeTarget = async (config: Config, target: Target) => {
@@ -17,7 +18,8 @@ export const createPackage = async (props: {
   targets: Target[];
 }) => {
   const { config, targets } = props;
-  const file = packageFile(config, targets);
+  const description = makePackageDescription(config, targets);
+  const file = packageFile(description);
 
   const dirExists = await exists(config.projectDir);
   if (!dirExists) {

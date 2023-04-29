@@ -5,7 +5,7 @@ import { makeConfig } from "../util";
 describe("Swift target unit tests", () => {
   test("creates simple library target", () => {
     const config: Config = makeConfig({
-      name: "test-target",
+      name: "TestPackage",
       productType: "library",
       language: "swift",
       includeTests: false,
@@ -17,7 +17,7 @@ describe("Swift target unit tests", () => {
 
   test("creates simple library target with tests", () => {
     const config: Config = makeConfig({
-      name: "test-target",
+      name: "TestPackage",
       productType: "library",
       language: "swift",
       includeTests: true,
@@ -32,7 +32,7 @@ describe("Swift target unit tests", () => {
 
   test("creates simple executable target", () => {
     const config: Config = makeConfig({
-      name: "test-target",
+      name: "TestPackage",
       productType: "executable",
       language: "swift",
       includeTests: false,
@@ -44,7 +44,7 @@ describe("Swift target unit tests", () => {
 
   test("creates simple executable target with tests", () => {
     const config: Config = makeConfig({
-      name: "test-target",
+      name: "TestPackage",
       productType: "executable",
       language: "swift",
       includeTests: true,
@@ -59,7 +59,7 @@ describe("Swift target unit tests", () => {
 
   test("creates simple plugin target", () => {
     const config: Config = makeConfig({
-      name: "test-target",
+      name: "TestPackage",
       productType: "plugin",
       language: "swift",
       includeTests: false,
@@ -71,7 +71,7 @@ describe("Swift target unit tests", () => {
 
   test("creates simple plugin target with tests", () => {
     const config: Config = makeConfig({
-      name: "test-target",
+      name: "TestPackage",
       productType: "executable",
       language: "swift",
       includeTests: true,

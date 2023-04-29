@@ -20,7 +20,7 @@ describe("Mixed language targets unit tests", () => {
 
   test("creates mixed language executable targets", () => {
     const config: Config = makeConfig({
-      name: "test-executable",
+      name: "TestExecutable",
       productType: "executable",
       language: "mixed",
       includeTests: false,
@@ -35,7 +35,7 @@ describe("Mixed language targets unit tests", () => {
 
   test("creates mixed language plugin targets", () => {
     const config: Config = makeConfig({
-      name: "test-plugin",
+      name: "TestPlugin",
       productType: "plugin",
       language: "mixed",
       includeTests: false,

@@ -1,6 +1,5 @@
-import { Config } from "../config";
 import { arg, decl, init, type SwiftFile, type Value } from "../swift/file";
-import { type Target } from "./target";
+import { PackageDescription } from "./description";
 
 // This works for now -- might need some additional logic later
 const platformVersion = (minimumVersion: string) => {
@@ -11,49 +10,46 @@ const platformVersion = (minimumVersion: string) => {
   return `.v${components.join("_")}`;
 };
 
-const product = (config: Config): Value => {
-  switch (config.productType) {
+const productValue = (
+  product: PackageDescription["products"][number]
+): Value => {
+  const { name, type } = product;
+  switch (type) {
     case "library":
-      return init(".library", [
-        arg("name", config.name),
-        arg("targets", [config.name]),
-      ]);
+      return init(".library", [arg("name", name), arg("targets", [name])]);
     case "executable":
-      return init(".executable", [
-        arg("name", config.name),
-        arg("targets", [config.name]),
-      ]);
+      return init(".executable", [arg("name", name), arg("targets", [name])]);
     case "plugin":
-      return init(".plugin", [
-        arg("name", config.name),
-        arg("targets", [config.name]),
-      ]);
+      return init(".plugin", [arg("name", name), arg("targets", [name])]);
   }
 };
 
-export const packageFile = (config: Config, targets: Target[]): SwiftFile => {
+export const packageFile = (description: PackageDescription): SwiftFile => {
   return {
-    headerComment: `swift-tools-version: ${config.minimumSwiftVersion}`,
+    headerComment: `swift-tools-version: ${description.toolsVersion}`,
     importedModules: ["PackageDescription"],
     globalDeclarations: [
       decl(
         "let",
         "package",
         init("Package", [
-          arg("name", config.name),
+          arg("name", description.packageName),
           arg(
             "platforms",
-            config.platforms.map((platform) =>
+            description.platforms.map((platform) =>
               init(`.${platform.platform}`, [
                 arg("_", init(platformVersion(platform.minimumVersion))),
               ])
             )
           ),
-          arg("products", [product(config)]),
+          arg(
+            "products",
+            description.products.map((product) => productValue(product))
+          ),
           arg("dependencies", []),
           arg(
             "targets",
-            targets.map((target) =>
+            description.targets.map((target) =>
               init(".target", [
                 arg("name", target.name),
                 arg(
