@@ -58,14 +58,12 @@ export type SwiftVersion = (typeof swiftVersions)[number]["version"];
 export type SwiftVersionInfo = {
   version: SwiftVersion;
   releaseDate: Date;
-  xcodeVersion: string;
 };
 export const allSwiftVersions: SwiftVersionInfo[] = swiftVersions
   .slice()
   .map((v) => ({
     version: v.version,
     releaseDate: new Date(Date.parse(v.releaseDate)),
-    xcodeVersion: v.xcodeVersion,
   }));
 
 /* Products */

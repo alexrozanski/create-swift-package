@@ -9,6 +9,7 @@ import {
   PlatformWithVersion,
   allLanguageTypes,
 } from "../config";
+import { getInstalledSwiftVersion } from "../swift/cmd";
 import {
   Platform,
   ProductType,
@@ -29,15 +30,47 @@ import {
 
 /* Util */
 
-const minimumVersionChoices = (): Choice[] => {
-  return allSwiftVersions
+const minimumVersionChoices = async () => {
+  const installedVersion = await getInstalledSwiftVersion();
+  const maxVersionLength = Math.max(
+    ...allSwiftVersions.map((v) => v.version.length)
+  );
+
+  const processed = allSwiftVersions
     .sort(versionCompareMapFn((v) => v.version))
-    .map((version) => ({
-      title: `${version.version} ${chalk.gray(
-        `(Released ${version.releaseDate.toLocaleDateString()})`
-      )}`,
-      value: version.version,
-    }));
+    .map((version) => {
+      const greaterThanAvailable =
+        installedVersion != null && lessThan(installedVersion, version.version);
+
+      return {
+        version,
+        available: !greaterThanAvailable,
+        isInstalled: version.version === installedVersion,
+      };
+    });
+
+  return {
+    choices: processed.map(({ version, available, isInstalled }) => {
+      const formattedReleaseDate = version.releaseDate.toLocaleDateString(
+        undefined,
+        {
+          dateStyle: "short",
+        }
+      );
+      const title = available
+        ? `${version.version.padEnd(maxVersionLength, " ")} ${chalk.gray(
+            `(Released ${formattedReleaseDate})`
+          )}${isInstalled ? " [Installed]" : ""}`
+        : version.version;
+
+      return {
+        title,
+        disabled: !available,
+        value: version.version,
+      };
+    }),
+    initial: processed.findIndex(({ available }) => available),
+  };
 };
 
 // Handle versions for each platform including which Swift version they were introduced for
@@ -140,11 +173,14 @@ const promptInitialConfig = async (projectDir?: string) => {
     });
   }
 
+  const { choices, initial } = await minimumVersionChoices();
+
   questions.push({
     type: "select",
     name: "minimumSwiftVersion",
     message: "Which version of Swift does your package target?",
-    choices: minimumVersionChoices(),
+    choices,
+    initial,
   });
 
   let cancelled = false;
