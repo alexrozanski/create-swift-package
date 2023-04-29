@@ -24,6 +24,28 @@ const mainTargetName = (config: Config) => {
     .replace(/\s+/g, "");
 };
 
+const makeFiles = (
+  name: string,
+  language: TargetLanguage,
+  templates: {
+    swiftTemplate: string;
+    cxxTemplates: { header: string; implementation: string };
+  }
+) => {
+  const { swiftTemplate, cxxTemplates } = templates;
+  switch (language) {
+    case "cfamily": {
+      const { header, implementation } = cxxTemplates;
+      return [
+        { path: `${name}.h`, template: header },
+        { path: `${name}.m`, template: implementation },
+      ];
+    }
+    case "swift":
+      return [{ path: `${name}.swift`, template: swiftTemplate }];
+  }
+};
+
 const makeMainTarget = (
   mainName: string,
   language: TargetLanguage,
@@ -33,7 +55,10 @@ const makeMainTarget = (
   role: "main",
   language,
   dependencies,
-  files: [],
+  files: makeFiles(mainName, language, {
+    swiftTemplate: "",
+    cxxTemplates: { header: "", implementation: "" },
+  }),
 });
 
 const makeOtherTarget = (
@@ -45,15 +70,21 @@ const makeOtherTarget = (
   role: "other",
   language,
   dependencies,
-  files: [],
+  files: makeFiles(name, language, {
+    swiftTemplate: "",
+    cxxTemplates: { header: "", implementation: "" },
+  }),
 });
 
-const makeTestTarget = (name: string, mainTarget: Target): Target => ({
-  name,
+const makeTestTarget = (mainTarget: Target): Target => ({
+  name: `${mainTarget.name}Tests`,
   role: "test",
   language: mainTarget.language,
   dependencies: [mainTarget],
-  files: [],
+  files: makeFiles(`${mainTarget.name}Tests`, mainTarget.language, {
+    swiftTemplate: "",
+    cxxTemplates: { header: "", implementation: "" },
+  }),
 });
 
 /* Public */
@@ -81,7 +112,7 @@ export const makeTargets = (config: Config): Target[] => {
   }
 
   if (config.includeTests) {
-    targets.push(makeTestTarget(`${mainName}Tests`, mainTarget));
+    targets.push(makeTestTarget(mainTarget));
   }
 
   return targets;
