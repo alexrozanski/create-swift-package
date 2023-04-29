@@ -2,6 +2,7 @@ import fs from "fs";
 import { F_OK, W_OK } from "node:constants";
 import { type Config } from "./config";
 import { packageString } from "./package";
+import { type Target } from "./target";
 
 const exists = async (filename: string) => {
   try {
@@ -21,8 +22,14 @@ const canWrite = async (filename: string) => {
   }
 };
 
-export const createPackage = async (config: Config) => {
-  const packageFile = packageString(config);
+const writeTarget = async (config: Config, target: Target) => {
+  fs.promises.mkdir(`${config.projectDir}/Sources/${target.name}`, {
+    recursive: true,
+  });
+};
+
+export const createPackage = async (config: Config, targets: Target[]) => {
+  const packageFile = packageString(config, targets);
 
   const dirExists = await exists(config.projectDir);
   if (!dirExists) {
@@ -38,4 +45,6 @@ export const createPackage = async (config: Config) => {
     `${config.projectDir}/Package.swift`,
     packageFile
   );
+
+  await Promise.all(targets.map((target) => writeTarget(config, target)));
 };

@@ -5,6 +5,7 @@ import { exit } from "process";
 import { parse } from "./lib/cli";
 import { createPackage } from "./lib/create";
 import { promptConfig } from "./lib/prompt";
+import { makeTargets } from "./lib/target";
 import packageJson from "./package.json";
 
 const cli = parse(process.argv, packageJson);
@@ -17,7 +18,8 @@ const cli = parse(process.argv, packageJson);
   }
 
   try {
-    await createPackage(config);
+    const targets = makeTargets(config);
+    await createPackage(config, targets);
   } catch (err) {
     console.error(
       chalk.red(`Couldn't create package: ${(err as Error).message}`)

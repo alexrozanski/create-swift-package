@@ -57,7 +57,7 @@ export const allSwiftVersions: SwiftVersionInfo[] = swiftVersions
     xcodeVersion: v.xcodeVersion,
   }));
 
-/* Targets */
+/* Products */
 
 export const ProductType = z.union([
   z.literal("library"),

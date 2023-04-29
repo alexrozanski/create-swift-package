@@ -7,6 +7,7 @@ import {
   type SwiftFile,
   type Value,
 } from "./swiftFile";
+import { type Target } from "./target";
 
 const platformVersion = (minimumVersion: string) => {
   const components = minimumVersion
@@ -35,7 +36,7 @@ const product = (config: Config): Value => {
   }
 };
 
-const packageFile = (config: Config): SwiftFile => {
+const packageFile = (config: Config, targets: Target[]): SwiftFile => {
   return {
     headerComment: `swift-tools-version: ${config.minimumSwiftVersion}`,
     importedModules: ["PackageDescription"],
@@ -55,18 +56,24 @@ const packageFile = (config: Config): SwiftFile => {
           ),
           arg("products", [product(config)]),
           arg("dependencies", []),
-          arg("targets", [
-            init(".target", [
-              arg("name", config.name),
-              arg("dependencies", []),
-            ]),
-          ]),
+          arg(
+            "targets",
+            targets.map((target) =>
+              init(".target", [
+                arg("name", target.name),
+                arg(
+                  "dependencies",
+                  target.dependencies.map((dep) => dep.name)
+                ),
+              ])
+            )
+          ),
         ])
       ),
     ],
   };
 };
 
-export const packageString = (config: Config) => {
-  return write(packageFile(config));
+export const packageString = (config: Config, targets: Target[]) => {
+  return write(packageFile(config, targets));
 };
