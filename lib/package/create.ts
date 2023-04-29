@@ -1,23 +1,27 @@
 import chalk from "chalk";
-import { exec } from "child_process";
 import fs from "fs";
 import _ from "lodash";
 import path from "path";
 import prompts from "prompts";
 import { packageFile } from ".";
-import { type CliOptions } from "../cli";
 import { type Config } from "../config";
 import { evaluateTemplate } from "../file/template";
 import { formatDirectoryTree, type Node } from "../format/directory";
 import { writeSwiftFile } from "../swift/file";
 import { canWrite, exists } from "../util/fs";
 import { makePackageDescription } from "./description";
+import { initGitRepo, openInXcode } from "./postActions";
 import { type Target } from "./target";
 
-const writeTarget = async (config: Config, target: Target, cli: CliOptions) => {
+const writeTarget = async (
+  config: Config,
+  target: Target,
+  options?: { dryRun?: boolean }
+) => {
   const targetBase = path.join(config.projectDir, "Sources", target.name);
+  const dryRun = !!options?.dryRun;
 
-  if (!cli.dryRun) {
+  if (!dryRun) {
     fs.promises.mkdir(targetBase, {
       recursive: true,
     });
@@ -114,21 +118,18 @@ const makeDirectoryStructure = (
   };
 };
 
-const openInXcode = async (directory: string) => {
-  // TODO: Read value from xcselect and use that?
-  await exec(`/usr/bin/env open -a Xcode.app ${directory}`);
-};
-
 export const createPackage = async (props: {
   config: Config;
   targets: Target[];
-  cli: CliOptions;
+  options?: { dryRun?: boolean };
 }) => {
-  const { config, targets, cli } = props;
+  const { config, targets, options } = props;
   const description = makePackageDescription(config, targets);
   const file = packageFile(description);
 
-  if (!cli.dryRun) {
+  const dryRun = !!options?.dryRun;
+
+  if (!dryRun) {
     const dirExists = await exists(config.projectDir);
     if (!dirExists) {
       await fs.promises.mkdir(config.projectDir, { recursive: true });
@@ -143,16 +144,17 @@ export const createPackage = async (props: {
       path.join(config.projectDir, "Package.swift"),
       writeSwiftFile(file)
     );
-
-    await fs.promises.writeFile(
-      path.join(config.projectDir, ".gitignore"),
-      evaluateTemplate({ template: "gitignore", props: {} })
-    );
   }
 
   await Promise.all(targets.map((target) => writeTarget(config, target, cli)));
 
-  if (cli.dryRun) {
+  if (!dryRun) {
+    if (config.initGitRepo) {
+      await initGitRepo(config.projectDir);
+    }
+  }
+
+  if (dryRun) {
     console.log(
       `\nPackage would be created at ${chalk.bold(config.projectDir)}`
     );
@@ -171,7 +173,7 @@ export const createPackage = async (props: {
     )
   );
 
-  if (!cli.dryRun) {
+  if (!dryRun) {
     const response = await prompts({
       type: "toggle",
       name: "open",

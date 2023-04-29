@@ -326,14 +326,24 @@ const promptTargetConfig = async () => {
 const promptMiscConfig = async () => {
   let cancelled = false;
   const response = await prompts(
-    {
-      type: "toggle",
-      name: "includeTests",
-      message: "Include tests?",
-      active: "Yes",
-      inactive: "No",
-      initial: true,
-    },
+    [
+      {
+        type: "toggle",
+        name: "includeTests",
+        message: "Include tests?",
+        active: "Yes",
+        inactive: "No",
+        initial: true,
+      },
+      {
+        type: "toggle",
+        name: "initGitRepo",
+        message: "Initialize git repo?",
+        active: "Yes",
+        inactive: "No",
+        initial: true,
+      },
+    ],
     {
       onCancel: () => {
         cancelled = true;
@@ -346,8 +356,9 @@ const promptMiscConfig = async () => {
   }
 
   const includeTests = z.boolean().parse(response.includeTests);
+  const initGitRepo = z.boolean().parse(response.initGitRepo);
 
-  return { includeTests };
+  return { includeTests, initGitRepo };
 };
 
 /* Public */

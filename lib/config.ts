@@ -32,4 +32,5 @@ export type Config = {
   language: LanguageOptions;
   minimumSwiftVersion: SwiftVersion;
   includeTests: boolean;
+  initGitRepo: boolean;
 };
