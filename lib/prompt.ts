@@ -195,20 +195,13 @@ const promptMiscConfig = async () => {
   return { includeTests };
 };
 
-const sanitizedName = (name: string) => {
-  return name
-    .replace(/[^a-zA-Z0-9\s]/g, " ")
-    .replace(/(?:^\w|[A-Z]|\b\w)/g, (firstChar) => firstChar.toUpperCase())
-    .replace(/\s+/g, "");
-};
-
 const sanitizedDirectory = (filePath: string) => {
   const fileName = path.basename(filePath);
   const dirName = path.dirname(filePath);
 
   const sanitizedFileName = fileName
-    .replace(/[^a-zA-Z0-9._-]+/g, "_")
-    .replace(/_+/g, "_");
+    .replace(/[^a-zA-Z0-9._-]+/g, "-")
+    .replace(/_+/g, "-");
 
   return path.join(dirName, sanitizedFileName);
 };
@@ -237,11 +230,10 @@ export const promptConfig = async (
   const targetConfig = await promptTargetConfig();
   const miscConfig = await promptMiscConfig();
 
-  const outputName = sanitizedName(name);
-
   return {
-    projectDir: projectDir || sanitizedDirectory(`${process.cwd()}/${name}`),
-    name: outputName,
+    projectDir:
+      projectDir || sanitizedDirectory(path.join(process.cwd(), name)),
+    name,
     platforms: platformConfig,
     minimumSwiftVersion,
     ...targetConfig,

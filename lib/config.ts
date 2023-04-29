@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { type Platform, type PlatformVersion, type ProductType } from "./swift";
+import {
+  SwiftVersion,
+  type Platform,
+  type PlatformVersion,
+  type ProductType,
+} from "./swift";
 
 export type PlatformWithVersion<P extends Platform> = {
   platform: Platform;
@@ -24,6 +29,6 @@ export type Config = {
   platforms: PlatformWithVersion<Platform>[];
   productType: ProductType;
   language: LanguageOption;
-  minimumSwiftVersion: string;
+  minimumSwiftVersion: SwiftVersion;
   includeTests: boolean;
 };

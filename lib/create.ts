@@ -1,5 +1,6 @@
 import fs from "fs";
 import { F_OK, W_OK } from "node:constants";
+import path from "path";
 import { type Config } from "./config";
 import { packageString } from "./package";
 import { type Target } from "./target";
@@ -23,12 +24,16 @@ const canWrite = async (filename: string) => {
 };
 
 const writeTarget = async (config: Config, target: Target) => {
-  fs.promises.mkdir(`${config.projectDir}/Sources/${target.name}`, {
+  fs.promises.mkdir(path.join(config.projectDir, "Sources", target.name), {
     recursive: true,
   });
 };
 
-export const createPackage = async (config: Config, targets: Target[]) => {
+export const createPackage = async (props: {
+  config: Config;
+  targets: Target[];
+}) => {
+  const { config, targets } = props;
   const packageFile = packageString(config, targets);
 
   const dirExists = await exists(config.projectDir);
@@ -42,7 +47,7 @@ export const createPackage = async (config: Config, targets: Target[]) => {
   }
 
   await fs.promises.writeFile(
-    `${config.projectDir}/Package.swift`,
+    path.join(config.projectDir, "Package.swift"),
     packageFile
   );
 

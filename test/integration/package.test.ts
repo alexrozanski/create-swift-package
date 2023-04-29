@@ -1,21 +1,26 @@
 import { exec } from "child_process";
 import fs from "fs";
+import path from "path";
 import tmp, { DirResult } from "tmp";
 import { createPackage } from "../../lib/create";
 
-describe("Package tests", () => {
+describe("Package integration tests", () => {
   let tmpDir: DirResult;
 
   beforeEach(() => {
     tmpDir = tmp.dirSync({ unsafeCleanup: true });
 
-    createPackage(tmpDir.name, {
-      name: "test",
-      platforms: [{ platform: "macOS", minimumVersion: "10.13" }],
-      targetType: "library",
-      targetLanguage: "swift",
-      minimumSwiftVersion: "5.7.1",
-      includeTests: true,
+    createPackage({
+      config: {
+        projectDir: tmpDir.name,
+        name: "test",
+        platforms: [{ platform: "macOS", minimumVersion: "10.13" }],
+        productType: "library",
+        language: "swift",
+        minimumSwiftVersion: "5.7.1",
+        includeTests: true,
+      },
+      targets: [],
     });
   });
 
@@ -24,7 +29,9 @@ describe("Package tests", () => {
   });
 
   test("successfully creates Package.swift", () => {
-    const packageExists = fs.existsSync(`${tmpDir.name}/Package.swift`);
+    const packageExists = fs.existsSync(
+      path.join(tmpDir.name, "Package.swift")
+    );
     expect(packageExists).toBeTruthy();
   });
 
