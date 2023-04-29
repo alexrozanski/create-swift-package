@@ -1,6 +1,9 @@
+import chalk from "chalk";
+import { exec } from "child_process";
 import fs from "fs";
 import _ from "lodash";
 import path from "path";
+import prompts from "prompts";
 import { packageFile } from ".";
 import { type CliOptions } from "../cli";
 import { type Config } from "../config";
@@ -111,6 +114,11 @@ const makeDirectoryStructure = (
   };
 };
 
+const openInXcode = async (directory: string) => {
+  // TODO: Read value from xcselect and use that?
+  await exec(`/usr/bin/env open -a Xcode.app ${directory}`);
+};
+
 export const createPackage = async (props: {
   config: Config;
   targets: Target[];
@@ -144,9 +152,37 @@ export const createPackage = async (props: {
 
   await Promise.all(targets.map((target) => writeTarget(config, target, cli)));
 
+  if (cli.dryRun) {
+    console.log(
+      `\nPackage would be created at ${chalk.bold(config.projectDir)}`
+    );
+    console.log(chalk.gray("-  Rerun without `--dry-run` to create\n"));
+  } else {
+    console.log(
+      chalk.green(
+        `\nPackage successfully created at ${chalk.bold(config.projectDir)}}:\n`
+      )
+    );
+  }
+
   console.log(
     formatDirectoryTree(
       makeDirectoryStructure(config, packageFiles(config, targets))
     )
   );
+
+  if (!cli.dryRun) {
+    const response = await prompts({
+      type: "toggle",
+      name: "open",
+      message: "Open in Xcode?",
+      active: "Yes",
+      inactive: "No",
+      initial: true,
+    });
+
+    if (!!response.open) {
+      await openInXcode(config.projectDir);
+    }
+  }
 };
