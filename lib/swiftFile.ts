@@ -54,13 +54,6 @@ class Writer {
   }
 }
 
-const platformVersion = (minimumVersion: string) => {
-  const components = minimumVersion
-    .split(".")
-    .filter((component) => Number(component) !== 0);
-  return `.v${components.join("_")}`;
-};
-
 export const decl = (
   type: "let",
   name: string,
