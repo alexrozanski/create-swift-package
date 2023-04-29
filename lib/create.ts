@@ -1,17 +1,41 @@
 import fs from "fs";
+import { F_OK, W_OK } from "node:constants";
 import { type Config } from "./config";
 import { packageString } from "./package";
 
-export const createPackage = (config: Config) => {
+const exists = async (filename: string) => {
+  try {
+    await fs.promises.access(filename, F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const canWrite = async (filename: string) => {
+  try {
+    await fs.promises.access(filename, W_OK);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+export const createPackage = async (config: Config) => {
   const packageFile = packageString(config);
 
-  if (!fs.existsSync(config.projectDir)) {
-    fs.mkdirSync(config.projectDir);
+  const dirExists = await exists(config.projectDir);
+  if (!dirExists) {
+    await fs.promises.mkdir(config.projectDir, { recursive: true });
   }
 
-  try {
-    fs.writeFileSync(`${config.projectDir}/Package.swift`, packageFile);
-  } catch (err) {
-    console.error(err);
+  const canWriteDir = await canWrite(config.projectDir);
+  if (!canWriteDir) {
+    throw new Error(`Can't write to '${config.projectDir}'`);
   }
+
+  await fs.promises.writeFile(
+    `${config.projectDir}/Package.swift`,
+    packageFile
+  );
 };

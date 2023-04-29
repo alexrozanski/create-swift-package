@@ -17,9 +17,11 @@ const cli = parse(process.argv, packageJson);
   }
 
   try {
-    createPackage(config);
+    await createPackage(config);
   } catch (err) {
-    console.error(chalk.red(err));
+    console.error(
+      chalk.red(`Couldn't create package: ${(err as Error).message}`)
+    );
     exit(1);
   }
 })();
