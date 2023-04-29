@@ -14,7 +14,7 @@ import {
 } from "./swift";
 import { greaterThanOrEqual, lessThan, versionCompareMapFn } from "./version";
 
-const promptInitialConfig = async (projectDirectory?: string) => {
+const promptInitialConfig = async (projectDir?: string) => {
   const nameQuestion: PromptObject = {
     type: "text",
     name: "name",
@@ -23,7 +23,7 @@ const promptInitialConfig = async (projectDirectory?: string) => {
   };
 
   let questions: PromptObject[] = [];
-  if (projectDirectory == null) {
+  if (projectDir == null) {
     questions.push(nameQuestion);
   }
 
@@ -42,10 +42,12 @@ const promptInitialConfig = async (projectDirectory?: string) => {
   });
 
   const response = await prompts(questions);
-  const name = z.string().parse(response.name);
-  const minimumSwiftVersion = z.string().parse(response.minimumSwiftVersion);
+  const pathComponents = (projectDir || "").split("/");
 
-  return { name, minimumSwiftVersion };
+  return {
+    name: response.name || pathComponents[pathComponents.length - 1],
+    minimumSwiftVersion: response.minimumSwiftVersion,
+  };
 };
 
 const promptPlatforms = async () => {
@@ -190,11 +192,9 @@ const promptMiscConfig = async () => {
 };
 
 export const promptConfig = async (
-  projectDirectory?: string
+  projectDir: string
 ): Promise<Config | null> => {
-  const { name, minimumSwiftVersion } = await promptInitialConfig(
-    projectDirectory
-  );
+  const { name, minimumSwiftVersion } = await promptInitialConfig(projectDir);
   if (minimumSwiftVersion == null) {
     return null;
   }
@@ -216,6 +216,7 @@ export const promptConfig = async (
   const miscConfig = await promptMiscConfig();
 
   return {
+    projectDir,
     name,
     platforms: platformConfig,
     minimumSwiftVersion,

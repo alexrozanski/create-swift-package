@@ -11,6 +11,7 @@ export type PlatformWithVersion<P extends Platform> = {
 };
 
 export type Config = {
+  projectDir: string;
   name: string;
   platforms: PlatformWithVersion<Platform>[];
   targetType: TargetType;

@@ -5,12 +5,10 @@ import { parse } from "./lib/cli";
 import { promptConfig } from "./lib/prompt";
 import packageJson from "./package.json";
 
-console.log(process.cwd());
-
 const cli = parse(process.argv, packageJson);
 
 (async function () {
-  const config = await promptConfig(cli.projectDirectory);
+  const config = await promptConfig(cli.projectDirectory || process.cwd());
   if (config == null) {
     console.log("Exiting.");
     exit(1);
