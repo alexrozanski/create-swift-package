@@ -17,7 +17,7 @@ describe("Package integration tests", () => {
         platforms: [{ platform: "macOS", minimumVersion: "10.13" }],
         productType: "library",
         language: "swift",
-        minimumSwiftVersion: "5.7.1",
+        minimumSwiftVersion: "5.7",
         includeTests: true,
       },
       targets: [],

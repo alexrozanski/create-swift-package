@@ -1,11 +1,10 @@
-import { Config } from "../../lib/config";
+import { Config, type LanguageOption } from "../../lib/config";
 import { ProductType } from "../../lib/swift";
-import { TargetLanguage } from "../../lib/target";
 
 export const makeConfig = (props: {
   name: string;
   productType: ProductType;
-  language: TargetLanguage;
+  language: LanguageOption;
   includeTests: boolean;
 }): Config => {
   const { name, productType, language, includeTests } = props;
