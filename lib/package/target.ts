@@ -1,9 +1,11 @@
 import path from "path";
 import { Config, LanguageOptions } from "../config";
+import { type Template } from "../file/template";
+import { ProductType } from "../swift/types";
 
 export type TargetFile = {
   path: string; // Relative path of the file within the target's folder
-  template: string; // Relative path to the template in `templates`
+  template: Template;
 };
 type TargetRole = "main" | "supporting" | "test";
 export type TargetLanguage = "swift" | "cfamily";
@@ -41,8 +43,8 @@ const makeFiles = (
   language: TargetLanguage,
   config: Config,
   templates: {
-    swiftTemplate: string;
-    cxxTemplates: { header: string; implementation: string };
+    swiftTemplate: Template;
+    cxxTemplates: { header?: Template; implementation?: Template };
   }
 ) => {
   const { swiftTemplate, cxxTemplates } = templates;
@@ -50,10 +52,26 @@ const makeFiles = (
     case "cfamily": {
       const { header, implementation } = cxxTemplates;
       const headerPath = cIncludePath(config.language) || "include";
-      return [
-        { path: path.join(headerPath, `${name}.h`), template: header },
-        { path: `${name}.m`, template: implementation },
-      ];
+      const headerFile =
+        header != null
+          ? { path: path.join(headerPath, `${name}.h`), template: header }
+          : null;
+      const implementationFile =
+        implementation != null
+          ? {
+              path: path.join(headerPath, `${name}.m`),
+              template: implementation,
+            }
+          : null;
+
+      var files: TargetFile[] = [];
+      if (headerFile != null) {
+        files.push(headerFile);
+      }
+      if (implementationFile != null) {
+        files.push(implementationFile);
+      }
+      return files;
     }
     case "swift":
       return [{ path: `${name}.swift`, template: swiftTemplate }];
@@ -62,6 +80,7 @@ const makeFiles = (
 
 const makeMainTarget = (
   mainName: string,
+  productType: ProductType,
   language: TargetLanguage,
   dependencies: Target[],
   config: Config
@@ -71,8 +90,11 @@ const makeMainTarget = (
   language,
   dependencies,
   files: makeFiles(mainName, language, config, {
-    swiftTemplate: "",
-    cxxTemplates: { header: "", implementation: "" },
+    swiftTemplate: {
+      template: `swift/${productType}/main`,
+      props: { targetName: mainName },
+    },
+    cxxTemplates: {},
   }),
 });
 
@@ -87,8 +109,11 @@ const makeSupportingTarget = (
   language,
   dependencies,
   files: makeFiles(name, language, config, {
-    swiftTemplate: "",
-    cxxTemplates: { header: "", implementation: "" },
+    swiftTemplate: {
+      template: "swift/supporting/main",
+      props: { targetName: name },
+    },
+    cxxTemplates: {},
   }),
 });
 
@@ -98,8 +123,11 @@ const makeTestTarget = (mainTarget: Target, config: Config): Target => ({
   language: mainTarget.language,
   dependencies: [mainTarget],
   files: makeFiles(`${mainTarget.name}Tests`, mainTarget.language, config, {
-    swiftTemplate: "",
-    cxxTemplates: { header: "", implementation: "" },
+    swiftTemplate: {
+      template: "swift/test/testCase",
+      props: { targetName: mainTarget.name },
+    },
+    cxxTemplates: {},
   }),
 });
 
@@ -107,16 +135,17 @@ const makeTestTarget = (mainTarget: Target, config: Config): Target => ({
 
 export const makeTargets = (config: Config): Target[] => {
   const targets: Target[] = [];
+  const { productType, language } = config;
 
   const mainName = mainTargetName(config);
   let mainTarget: Target;
-  switch (config.language.type) {
+  switch (language.type) {
     case "cfamily":
-      mainTarget = makeMainTarget(mainName, "cfamily", [], config);
+      mainTarget = makeMainTarget(mainName, productType, "cfamily", [], config);
       targets.push(mainTarget);
       break;
     case "swift":
-      mainTarget = makeMainTarget(mainName, "swift", [], config);
+      mainTarget = makeMainTarget(mainName, productType, "swift", [], config);
       targets.push(mainTarget);
       break;
     case "mixed":
@@ -126,7 +155,13 @@ export const makeTargets = (config: Config): Target[] => {
         [],
         config
       );
-      mainTarget = makeMainTarget(mainName, "swift", [objCxx], config);
+      mainTarget = makeMainTarget(
+        mainName,
+        productType,
+        "swift",
+        [objCxx],
+        config
+      );
       targets.push(mainTarget);
       targets.push(objCxx);
       break;

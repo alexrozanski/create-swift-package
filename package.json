@@ -4,7 +4,7 @@
   "description": "An interactive and more fully-featured alternative to swift package init",
   "main": "index.js",
   "scripts": {
-    "dev": "esbuild index.ts --bundle --outdir=dist --platform=node --watch",
+    "dev": "esbuild index.ts --bundle --outdir=dist --platform=node --watch --loader:.mustache=text",
     "test": "jest",
     "unit": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/unit\""
   },
@@ -26,6 +26,7 @@
   "devDependencies": {
     "@types/jest": "^29.5.1",
     "@types/lodash": "^4.14.194",
+    "@types/mustache": "^4.2.2",
     "@types/node": "^18.16.2",
     "@types/prompts": "2.0.1",
     "@types/tmp": "^0.2.3",

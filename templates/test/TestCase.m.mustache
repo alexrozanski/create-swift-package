@@ -1,0 +1,28 @@
+#import <XCTest/XCTest.h>
+
+@interface {{targetName}}Tests : XCTestCase
+@end
+
+@implementation MyLibraryTests
+
+- (void)setUp {
+    [super setUp];
+
+    // Peform shared test setup here.
+}
+
+- (void)tearDown {
+    // Peform shared test teardown here.
+
+    [super tearDown];
+}
+
+- (void)testExample {
+    NSString *input = @"Hello, MyLibrary!";
+    NSString *expectedOutput = @"Processed: Hello, MyLibrary!";
+
+    NSString *actualOutput = [self.myLibrary processString:input];
+    XCTAssertEqualObjects(expectedOutput, actualOutput, @"MyLibrary should correctly process strings");
+}
+
+@end

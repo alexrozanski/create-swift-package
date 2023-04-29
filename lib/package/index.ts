@@ -24,6 +24,10 @@ const productValue = (
   }
 };
 
+/**
+ * General purpose AST for Package.swift. This should be easy to modify for different versions
+ * of Swift or if this format changes.
+ */
 export const packageFile = (description: PackageDescription): SwiftFile => {
   return {
     headerComment: `swift-tools-version: ${description.toolsVersion}`,

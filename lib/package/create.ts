@@ -4,16 +4,32 @@ import path from "path";
 import { packageFile } from ".";
 import { type CliOptions } from "../cli";
 import { type Config } from "../config";
+import { evaluateTemplate } from "../file/template";
 import { formatDirectoryTree, type Node } from "../format/directory";
 import { writeSwiftFile } from "../swift/file";
 import { canWrite, exists } from "../util/fs";
 import { makePackageDescription } from "./description";
 import { type Target } from "./target";
 
-const writeTarget = async (config: Config, target: Target) => {
-  fs.promises.mkdir(path.join(config.projectDir, "Sources", target.name), {
-    recursive: true,
-  });
+const writeTarget = async (config: Config, target: Target, cli: CliOptions) => {
+  const targetBase = path.join(config.projectDir, "Sources", target.name);
+
+  if (!cli.dryRun) {
+    fs.promises.mkdir(targetBase, {
+      recursive: true,
+    });
+  }
+
+  await Promise.all(
+    target.files.map(async (file) => {
+      const contents = evaluateTemplate(file.template);
+      const filePath = path.join(targetBase, file.path);
+      const { dir } = path.parse(filePath);
+
+      await fs.promises.mkdir(dir, { recursive: true });
+      return await fs.promises.writeFile(filePath, contents);
+    })
+  );
 };
 
 const relativePath = (pathInTarget: string, target: Target) => {
@@ -27,6 +43,7 @@ const packageFiles = (config: Config, targets: Target[]) => {
         target.files.map((file) => relativePath(file.path, target))
       ),
       "Package.swift",
+      ".gitignore",
     ],
     targetPaths: targets.map((target) => relativePath("/", target)),
   };
@@ -118,8 +135,14 @@ export const createPackage = async (props: {
       path.join(config.projectDir, "Package.swift"),
       writeSwiftFile(file)
     );
-    await Promise.all(targets.map((target) => writeTarget(config, target)));
+
+    await fs.promises.writeFile(
+      path.join(config.projectDir, ".gitignore"),
+      evaluateTemplate({ template: "gitignore", props: {} })
+    );
   }
+
+  await Promise.all(targets.map((target) => writeTarget(config, target, cli)));
 
   console.log(
     formatDirectoryTree(
