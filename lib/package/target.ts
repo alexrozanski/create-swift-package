@@ -1,5 +1,5 @@
 import path from "path";
-import { Config, LanguageOptions } from "../config";
+import { Config, cIncludePath } from "../config";
 import { type Template } from "../file/template";
 import { ProductType } from "../swift/types";
 
@@ -8,7 +8,9 @@ export type TargetFile = {
   template: Template;
 };
 type TargetRole = "main" | "supporting" | "test";
-export type TargetLanguage = "swift" | "cfamily";
+export type TargetLanguage =
+  | { type: "swift" }
+  | { type: "cfamily"; publicHeadersPath: string };
 
 export type Target = {
   name: string;
@@ -27,17 +29,6 @@ const mainTargetName = (config: Config) => {
     .replace(/\s+/g, "");
 };
 
-const cIncludePath = (languageOptions: LanguageOptions) => {
-  switch (languageOptions.type) {
-    case "cfamily":
-      return languageOptions.includePath;
-    case "mixed":
-      return languageOptions.cIncludePath;
-    case "swift":
-      return null;
-  }
-};
-
 const makeFiles = (
   name: string,
   language: TargetLanguage,
@@ -48,7 +39,7 @@ const makeFiles = (
   }
 ) => {
   const { swiftTemplate, cxxTemplates } = templates;
-  switch (language) {
+  switch (language.type) {
     case "cfamily": {
       const { header, implementation } = cxxTemplates;
       const headerPath = cIncludePath(config.language) || "include";
@@ -191,26 +182,41 @@ export const makeTargets = (config: Config): Target[] => {
 
   const mainName = mainTargetName(config);
   let mainTarget: Target;
+
+  const publicHeadersPath = cIncludePath(language) || "include";
+
   switch (language.type) {
     case "cfamily":
-      mainTarget = makeMainTarget(mainName, productType, "cfamily", [], config);
+      mainTarget = makeMainTarget(
+        mainName,
+        productType,
+        { type: "cfamily", publicHeadersPath },
+        [],
+        config
+      );
       targets.push(mainTarget);
       break;
     case "swift":
-      mainTarget = makeMainTarget(mainName, productType, "swift", [], config);
+      mainTarget = makeMainTarget(
+        mainName,
+        productType,
+        { type: "swift" },
+        [],
+        config
+      );
       targets.push(mainTarget);
       break;
     case "mixed":
       const objCxx = makeSupportingTarget(
         `${mainName}ObjCxx`,
-        "cfamily",
+        { type: "cfamily", publicHeadersPath },
         [],
         config
       );
       mainTarget = makeMainTarget(
         mainName,
         productType,
-        "swift",
+        { type: "swift" },
         [objCxx],
         config
       );

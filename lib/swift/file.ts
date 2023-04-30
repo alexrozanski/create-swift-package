@@ -24,8 +24,12 @@ type GlobalDeclaration = {
   initializer: Initializer;
 };
 export type Value = string | Initializer | Value[];
-type Argument = { name: string; value: Value };
-type Initializer = { type: "initializer"; name: string; args: Argument[] };
+export type Argument = { name: string; value: Value };
+export type Initializer = {
+  type: "initializer";
+  name: string;
+  args: Argument[];
+};
 
 /* AST sugar functions */
 

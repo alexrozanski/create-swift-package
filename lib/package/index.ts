@@ -1,5 +1,13 @@
-import { arg, decl, init, type SwiftFile, type Value } from "../swift/file";
-import { PackageDescription } from "./description";
+import {
+  arg,
+  decl,
+  init,
+  type Argument,
+  type SwiftFile,
+  type Value,
+} from "../swift/file";
+import { type PackageDescription } from "./description";
+import { type Target } from "./target";
 
 // This works for now -- might need some additional logic later
 const platformVersion = (minimumVersion: string) => {
@@ -20,6 +28,30 @@ const productValue = (
     case "executable":
       return init(".executable", [arg("name", name), arg("targets", [name])]);
   }
+};
+
+const targetValue = (target: Target): Value => {
+  let publicHeadersArg: Argument | null;
+  switch (target.language.type) {
+    case "cfamily":
+      publicHeadersArg = arg(
+        "publicHeadersPath",
+        target.language.publicHeadersPath
+      );
+      break;
+    case "swift":
+      publicHeadersArg = null;
+      break;
+  }
+
+  return init(".target", [
+    arg("name", target.name),
+    arg(
+      "dependencies",
+      target.dependencies.map((dep) => dep.name)
+    ),
+    ...(publicHeadersArg ? [publicHeadersArg] : []),
+  ]);
 };
 
 /**
@@ -51,15 +83,7 @@ export const packageFile = (description: PackageDescription): SwiftFile => {
           arg("dependencies", []),
           arg(
             "targets",
-            description.targets.map((target) =>
-              init(".target", [
-                arg("name", target.name),
-                arg(
-                  "dependencies",
-                  target.dependencies.map((dep) => dep.name)
-                ),
-              ])
-            )
+            description.targets.map((target) => targetValue(target))
           ),
         ])
       ),

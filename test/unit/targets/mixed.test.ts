@@ -12,9 +12,9 @@ describe("Mixed language targets unit tests", () => {
     });
     const targets = makeTargets(config);
     expect(targets.length).toBe(2);
-    expect(targets[0].language).toBe("swift");
+    expect(targets[0].language.type).toBe("swift");
     expect(targets[0].name).toBe("TestLibrary");
-    expect(targets[1].language).toBe("cfamily");
+    expect(targets[1].language.type).toBe("cfamily");
     expect(targets[1].name).toBe("TestLibraryObjCxx");
   });
 
@@ -27,9 +27,9 @@ describe("Mixed language targets unit tests", () => {
     });
     const targets = makeTargets(config);
     expect(targets.length).toBe(2);
-    expect(targets[0].language).toBe("swift");
+    expect(targets[0].language.type).toBe("swift");
     expect(targets[0].name).toBe("TestExecutable");
-    expect(targets[1].language).toBe("cfamily");
+    expect(targets[1].language.type).toBe("cfamily");
     expect(targets[1].name).toBe("TestExecutableObjCxx");
   });
 });

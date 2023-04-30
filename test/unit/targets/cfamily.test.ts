@@ -12,7 +12,7 @@ describe("C-family target unit tests", () => {
     });
     const targets = makeTargets(config);
     expect(targets.length).toBe(1);
-    expect(targets[0].language).toBe("cfamily");
+    expect(targets[0].language.type).toBe("cfamily");
   });
 
   test("creates simple library target with tests", () => {
@@ -24,9 +24,9 @@ describe("C-family target unit tests", () => {
     });
     const targets = makeTargets(config);
     expect(targets.length).toBe(2);
-    expect(targets[0].language).toBe("cfamily");
+    expect(targets[0].language.type).toBe("cfamily");
     expect(targets[0].role).toBe("main");
-    expect(targets[1].language).toBe("cfamily");
+    expect(targets[1].language.type).toBe("cfamily");
     expect(targets[1].role).toBe("test");
   });
 
@@ -39,7 +39,7 @@ describe("C-family target unit tests", () => {
     });
     const targets = makeTargets(config);
     expect(targets.length).toBe(1);
-    expect(targets[0].language).toBe("cfamily");
+    expect(targets[0].language.type).toBe("cfamily");
   });
 
   test("creates simple executable target with tests", () => {
@@ -51,9 +51,9 @@ describe("C-family target unit tests", () => {
     });
     const targets = makeTargets(config);
     expect(targets.length).toBe(2);
-    expect(targets[0].language).toBe("cfamily");
+    expect(targets[0].language.type).toBe("cfamily");
     expect(targets[0].role).toBe("main");
-    expect(targets[1].language).toBe("cfamily");
+    expect(targets[1].language.type).toBe("cfamily");
     expect(targets[1].role).toBe("test");
   });
 });

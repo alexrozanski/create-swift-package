@@ -34,3 +34,14 @@ export type Config = {
   includeTests: boolean;
   initGitRepo: boolean;
 };
+
+export const cIncludePath = (languageOptions: LanguageOptions) => {
+  switch (languageOptions.type) {
+    case "cfamily":
+      return languageOptions.includePath;
+    case "mixed":
+      return languageOptions.cIncludePath;
+    case "swift":
+      return null;
+  }
+};
