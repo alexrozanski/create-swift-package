@@ -10,7 +10,7 @@ import { formatDirectoryTree, type Node } from "../format/directory";
 import { writeSwiftFile } from "../swift/file";
 import { canWrite, exists } from "../util/fs";
 import { makePackageDescription } from "./description";
-import { initGitRepo, openInXcode } from "./postActions";
+import { buildPackage, initGitRepo, openInXcode } from "./postActions";
 import { type Target } from "./target";
 
 const writeTarget = async (
@@ -153,6 +153,15 @@ export const createPackage = async (props: {
   if (!dryRun) {
     if (config.initGitRepo) {
       await initGitRepo(config.projectDir);
+    }
+  }
+
+  if (!dryRun && interactive) {
+    const { success, interrupt } = await buildPackage(config.projectDir);
+    if (!success && !interrupt) {
+      console.log(chalk.red("Failed to build package."));
+      console.log("Exiting");
+      return;
     }
   }
 
