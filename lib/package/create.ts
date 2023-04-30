@@ -1,6 +1,7 @@
 import chalk from "chalk";
 import fs from "fs";
 import _ from "lodash";
+import ora from "ora";
 import path from "path";
 import prompts from "prompts";
 import { packageFile } from ".";
@@ -159,7 +160,7 @@ export const createPackage = async (props: {
   if (!dryRun && interactive) {
     const { success, interrupt } = await buildPackage(config.projectDir);
     if (!success && !interrupt) {
-      console.log(chalk.red("Failed to build package."));
+      ora(chalk.bold("Failed to build package.")).fail();
       console.log("Exiting");
       return;
     }
@@ -172,21 +173,22 @@ export const createPackage = async (props: {
       );
       console.log(chalk.gray("-  Rerun without `--dry-run` to create\n"));
     } else {
-      console.log(
-        chalk.green(
-          `\nPackage successfully created at ${chalk.bold(
-            config.projectDir
-          )}):\n`
-        )
-      );
+      ora(
+        chalk.bold(`Package created at ${chalk.bold(config.projectDir)}`)
+      ).succeed();
     }
-  }
 
-  if (!quiet) {
+    console.log();
     console.log(
       formatDirectoryTree(
         makeDirectoryStructure(config, packageFiles(config, targets))
       )
+    );
+
+    console.log(
+      `View the Package.swift docs at ${chalk.underline(
+        "https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html"
+      )}\n`
     );
   }
 

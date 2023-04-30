@@ -178,7 +178,9 @@ const promptInitialConfig = async (projectDir?: string) => {
   questions.push({
     type: "select",
     name: "minimumSwiftVersion",
-    message: "Which version of Swift does your package target?",
+    message: `Which version of ${chalk.cyan(
+      "Swift"
+    )} does your package target?`,
     choices,
     initial,
   });
@@ -257,7 +259,9 @@ const promptPlatformVersions = async (
         {
           type: "select",
           name: "version",
-          message: `Which minimum ${platformInfo.name} version do you want to support?`,
+          message: `Which minimum ${chalk.cyan(
+            platformInfo.name
+          )} version do you want to support?`,
           initial,
           choices,
         },
