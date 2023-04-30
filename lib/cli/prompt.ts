@@ -58,9 +58,9 @@ const minimumVersionChoices = async () => {
         }
       );
       const title = available
-        ? `${version.version.padEnd(maxVersionLength, " ")} ${chalk.gray(
-            `(Released ${formattedReleaseDate})`
-          )}${isInstalled ? " [Installed]" : ""}`
+        ? `${version.version.padEnd(maxVersionLength, " ")} ${
+            isInstalled ? chalk.gray(" [Installed]") : ""
+          }`
         : version.version;
 
       return {
