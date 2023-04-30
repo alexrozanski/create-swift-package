@@ -14,17 +14,6 @@ const isRoot = (node: Node) =>
 const isPackage = (node: Node) =>
   node.type === "directory" && node.marker === "package";
 
-function nodeDepth(node: Node): number {
-  switch (node.type) {
-    case "file":
-      return 1;
-    case "directory":
-      return (
-        1 + Math.max(...Object.values(node.contents).map((n) => nodeDepth(n)))
-      );
-  }
-}
-
 export const formatDirectoryTree = (
   root: Node,
   options?: { useAnsiEscapeCodes?: boolean }
@@ -60,9 +49,22 @@ export const formatDirectoryTree = (
       const entries = Object.entries(node.contents);
       // Sort so that directory nodes are listed first.
       entries.sort(([_, a], [__, b]) => {
-        const d1 = nodeDepth(a);
-        const d2 = nodeDepth(b);
-        return d1 < d2 ? 1 : d1 > d2 ? -1 : 0;
+        if (
+          (a.type === "directory" && b.type === "directory") ||
+          (a.type === "file" && b.type === "file")
+        ) {
+          return a.name.length < b.name.length
+            ? -1
+            : a.name.length > b.name.length
+            ? 1
+            : 0;
+        } else if (a.type === "directory" && b.type === "file") {
+          return -1;
+        } else if (a.type === "file" && b.type === "directory") {
+          return 1;
+        } else {
+          return 0;
+        }
       });
       entries.forEach(([key, child], index) => {
         output += formatNode(
