@@ -1,6 +1,6 @@
 {
   "name": "create-swift-package",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "An interactive alternative to swift package init",
   "scripts": {
     "dev": "esbuild index.ts --bundle --outdir=dist --platform=node --watch --loader:.mustache=text",
