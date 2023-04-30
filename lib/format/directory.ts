@@ -48,8 +48,12 @@ export const formatDirectoryTree = (
     var output = "";
     const start = level > 0 ? (isLast ? `${prefix}└──` : `${prefix}├──`) : "";
     output += `${start}${marker} ${
-      useAnsiEscapeCodes && (isPackage(node) || isRoot(node))
-        ? chalk.bold(node.name)
+      useAnsiEscapeCodes
+        ? isPackage(node)
+          ? chalk.bold.cyan(node.name)
+          : isRoot(node)
+          ? chalk.bold(node.name)
+          : node.name
         : node.name
     }\n`;
     if (node.type === "directory") {
