@@ -1,10 +1,10 @@
 {
   "name": "create-swift-package",
   "version": "1.0.0",
-  "description": "An interactive and more fully-featured alternative to swift package init",
-  "main": "index.js",
+  "description": "An interactive alternative to swift package init",
   "scripts": {
     "dev": "esbuild index.ts --bundle --outdir=dist --platform=node --watch --loader:.mustache=text",
+    "build": "esbuild index.ts --bundle --outdir=dist --platform=node --minify --loader:.mustache=text",
     "test": "npm run unit && npm run integration",
     "test:unit": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/unit\"",
     "test:integration:basic": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/integration/basic\"",
@@ -16,6 +16,20 @@
   ],
   "author": "Alex Rozanski",
   "license": "MIT",
+  "bin": {
+    "create-swift-package": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alexrozanski/create-swift-package"
+  },
+  "bugs": {
+    "url": "https://github.com/alexrozanski/create-swift-package/issues"
+  },
+  "funding": "https://github.com/sponsors/alexrozanski",
   "dependencies": {
     "chalk": "^5.2.0",
     "commander": "^10.0.1",
