@@ -1,6 +1,6 @@
 {
   "name": "create-swift-package",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An interactive alternative to swift package init",
   "scripts": {
     "dev": "esbuild index.ts --bundle --outdir=dist --platform=node --watch --loader:.mustache=text",
@@ -33,17 +33,6 @@
     "url": "https://github.com/alexrozanski/create-swift-package/issues"
   },
   "funding": "https://github.com/sponsors/alexrozanski",
-  "dependencies": {
-    "chalk": "^5.2.0",
-    "commander": "^10.0.1",
-    "execa": "^7.1.1",
-    "lodash": "^4.17.21",
-    "meow": "^11.0.0",
-    "mustache": "^4.2.0",
-    "ora": "^6.3.0",
-    "prompts": "2.1.0",
-    "zod": "^3.21.4"
-  },
   "devDependencies": {
     "@glen/jest-raw-loader": "^2.0.0",
     "@types/jest": "^29.5.1",
@@ -58,6 +47,15 @@
     "tmp": "^0.2.1",
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.4"
+    "typescript": "^5.0.4",
+    "chalk": "^5.2.0",
+    "commander": "^10.0.1",
+    "execa": "^7.1.1",
+    "lodash": "^4.17.21",
+    "meow": "^11.0.0",
+    "mustache": "^4.2.0",
+    "ora": "^6.3.0",
+    "prompts": "2.1.0",
+    "zod": "^3.21.4"
   }
 }
