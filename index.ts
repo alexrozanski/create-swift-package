@@ -22,7 +22,12 @@ const cli = parse(process.argv, packageJson);
     await createPackage({
       config,
       targets,
-      options: { dryRun: cli.dryRun, interactive: true },
+      options: {
+        dryRun: cli.dryRun,
+        interactive: true,
+        runSwiftBuild: !cli.noSwiftBuild,
+        promptXcode: !cli.noPromptXcode,
+      },
     });
   } catch (err) {
     console.error(

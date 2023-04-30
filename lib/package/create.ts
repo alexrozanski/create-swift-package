@@ -122,13 +122,25 @@ const makeDirectoryStructure = (
 export const createPackage = async (props: {
   config: Config;
   targets: Target[];
-  options?: { dryRun?: boolean; interactive?: boolean; quiet?: boolean };
+  options?: {
+    dryRun?: boolean;
+    interactive?: boolean;
+    quiet?: boolean;
+    runSwiftBuild?: boolean;
+    promptXcode?: boolean;
+  };
 }) => {
   const { config, targets, options } = props;
   const description = makePackageDescription(config, targets);
   const file = packageFile(description);
 
-  const { dryRun = false, interactive = true, quiet = false } = options || {};
+  const {
+    dryRun = false,
+    interactive = true,
+    quiet = false,
+    runSwiftBuild = true,
+    promptXcode = true,
+  } = options || {};
 
   if (!dryRun) {
     const dirExists = await exists(config.projectDir);
@@ -157,7 +169,7 @@ export const createPackage = async (props: {
     }
   }
 
-  if (!dryRun && interactive) {
+  if (!dryRun && interactive && runSwiftBuild) {
     const { success, interrupt } = await buildPackage(config.projectDir);
     if (!success && !interrupt) {
       ora(chalk.bold("Failed to build package.")).fail();
@@ -168,10 +180,12 @@ export const createPackage = async (props: {
 
   if (!quiet) {
     if (dryRun) {
-      console.log(
-        `\nPackage would be created at ${chalk.bold(config.projectDir)}`
-      );
-      console.log(chalk.gray("-  Rerun without `--dry-run` to create\n"));
+      ora(
+        chalk.bold(
+          `Package would be created at ${chalk.bold(config.projectDir)}`
+        )
+      ).info();
+      console.log(chalk.gray("  - Rerun without `--dry-run` to create"));
     } else {
       ora(
         chalk.bold(`Package created at ${chalk.bold(config.projectDir)}`)
@@ -183,16 +197,21 @@ export const createPackage = async (props: {
       formatDirectoryTree(
         makeDirectoryStructure(config, packageFiles(config, targets))
       )
+        .split("\n")
+        .map((line) => `  ${line}`)
+        .join("\n")
     );
 
-    console.log(
-      `View the Package.swift docs at ${chalk.underline(
-        "https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html"
-      )}\n`
-    );
+    ora(
+      chalk.bold(
+        `View the Package.swift docs at ${chalk.underline(
+          "https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html"
+        )}`
+      )
+    ).info();
   }
 
-  if (!dryRun && interactive) {
+  if (!dryRun && interactive && promptXcode) {
     const response = await prompts({
       type: "toggle",
       name: "open",
