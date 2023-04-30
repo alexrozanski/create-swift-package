@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { execa } from "execa";
 import path from "path";
 import { type Config } from "../../lib/config";
 import { createPackage } from "../../lib/package/create";
@@ -6,7 +6,7 @@ import { makeTargets } from "../../lib/package/target";
 import { exists } from "../../lib/util/fs";
 import { makeTemporaryDirectory } from "./util";
 
-describe("Package integration tests", () => {
+describe("Basic package integration tests", () => {
   let tmpDir: string;
   let removeDir: () => void;
 
@@ -15,6 +15,7 @@ describe("Package integration tests", () => {
     tmpDir = path;
     removeDir = remove;
 
+    // A simple test config
     const config: Config = {
       projectDir: tmpDir,
       name: "test",
@@ -39,18 +40,11 @@ describe("Package integration tests", () => {
     expect(packageExists).toBeTruthy();
   });
 
-  test("creates valid Package.swift", (done) => {
-    exec(
-      "/usr/bin/env swift package dump-package",
-      { cwd: tmpDir },
-      (error) => {
-        try {
-          expect(error).toBe(null);
-          done();
-        } catch (e) {
-          done(e);
-        }
-      }
-    );
+  test("creates valid Package.swift", async () => {
+    await execa("swift", ["package", "dump-package"], { cwd: tmpDir });
   });
+
+  test("creates buildable package", async () => {
+    await execa("swift", ["build"], { cwd: tmpDir });
+  }, 30000);
 });
