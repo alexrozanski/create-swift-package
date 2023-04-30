@@ -59,7 +59,7 @@ const makeFiles = (
       const implementationFile =
         implementation != null
           ? {
-              path: path.join(headerPath, `${name}.m`),
+              path: `${name}.m`,
               template: implementation,
             }
           : null;
