@@ -44,6 +44,7 @@ const relativePath = (pathInTarget: string, target: Target) => {
   return path.join("Sources", target.name, pathInTarget);
 };
 
+// Returns paths relative to the package directory.
 const packageFiles = (config: Config, targets: Target[]) => {
   return {
     filePaths: [
@@ -119,6 +120,20 @@ const makeDirectoryStructure = (
   };
 };
 
+const conflictingExistingFiles = async (
+  projectDir: string,
+  relativePaths: string[]
+) => {
+  const filesWithStatus = await Promise.all(
+    relativePaths.map(async (relativePath) => {
+      const absolutePath = path.join(projectDir, relativePath);
+      return { absolutePath, exists: await exists(absolutePath) };
+    })
+  );
+
+  return filesWithStatus.filter(({ exists }) => exists);
+};
+
 export const createPackage = async (props: {
   config: Config;
   targets: Target[];
@@ -141,6 +156,26 @@ export const createPackage = async (props: {
     runSwiftBuild = true,
     promptXcode = true,
   } = options || {};
+
+  const files = packageFiles(config, targets);
+  const { filePaths } = files;
+
+  const conflictingFiles = await conflictingExistingFiles(
+    config.projectDir,
+    filePaths
+  );
+
+  if (conflictingFiles.length > 0) {
+    ora(
+      chalk.bold("Existing files would be overwritten by package creation")
+    ).fail();
+    conflictingFiles.forEach(({ absolutePath }) => {
+      console.log(chalk.gray(`  - ${absolutePath}`));
+    });
+
+    console.log("Exiting");
+    return false;
+  }
 
   if (!dryRun) {
     const dirExists = await exists(config.projectDir);
@@ -174,7 +209,7 @@ export const createPackage = async (props: {
     if (!success && !interrupt) {
       ora(chalk.bold("Failed to build package.")).fail();
       console.log("Exiting");
-      return;
+      return false;
     }
   }
 
@@ -201,14 +236,6 @@ export const createPackage = async (props: {
         .map((line) => `  ${line}`)
         .join("\n")
     );
-
-    ora(
-      chalk.bold(
-        `View the Package.swift docs at ${chalk.underline(
-          "https://docs.swift.org/package-manager/PackageDescription/PackageDescription.html"
-        )}`
-      )
-    ).info();
   }
 
   if (!dryRun && interactive && promptXcode) {
@@ -225,4 +252,6 @@ export const createPackage = async (props: {
       await openInXcode(config.projectDir);
     }
   }
+
+  return true;
 };

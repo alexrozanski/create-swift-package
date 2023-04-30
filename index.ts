@@ -19,7 +19,7 @@ const cli = parse(process.argv, packageJson);
 
   try {
     const targets = makeTargets(config);
-    await createPackage({
+    const success = await createPackage({
       config,
       targets,
       options: {
@@ -29,6 +29,10 @@ const cli = parse(process.argv, packageJson);
         promptXcode: cli.promptXcode,
       },
     });
+
+    if (!success) {
+      exit(1);
+    }
   } catch (err) {
     console.error(
       chalk.red(`Couldn't create package: ${(err as Error).message}`)
