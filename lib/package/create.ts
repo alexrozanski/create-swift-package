@@ -51,7 +51,7 @@ const packageFiles = (config: Config, targets: Target[]) => {
         target.files.map((file) => relativePath(file.path, target))
       ),
       "Package.swift",
-      ".gitignore",
+      ...(config.initGitRepo ? [".gitignore"] : []),
     ],
     targetPaths: targets.map((target) => relativePath("/", target)),
   };
