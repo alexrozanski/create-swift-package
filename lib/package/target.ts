@@ -89,25 +89,30 @@ const makeMainTarget = (
   role: "main",
   language,
   dependencies,
-  files: makeFiles(mainName, language, config, {
-    swiftTemplate: {
-      template: `${productType}/main/swift`,
-      props: { targetName: mainName },
-    },
-    cxxTemplates: {
-      header:
-        productType === "library"
-          ? {
-              template: `library/main/objCHeader`,
-              props: { targetName: mainName },
-            }
-          : undefined,
-      implementation: {
-        template: `${productType}/main/objCImplementation`,
+  files: makeFiles(
+    productType === "executable" ? "main" : mainName,
+    language,
+    config,
+    {
+      swiftTemplate: {
+        template: `${productType}/main/swift`,
         props: { targetName: mainName },
       },
-    },
-  }),
+      cxxTemplates: {
+        header:
+          productType === "library"
+            ? {
+                template: `library/main/objCHeader`,
+                props: { targetName: mainName },
+              }
+            : undefined,
+        implementation: {
+          template: `${productType}/main/objCImplementation`,
+          props: { targetName: mainName },
+        },
+      },
+    }
+  ),
 });
 
 const makeSupportingTarget = (

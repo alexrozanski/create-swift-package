@@ -1,10 +1,10 @@
 import { execa } from "execa";
 import path from "path";
-import { type Config } from "../../lib/config";
-import { createPackage } from "../../lib/package/create";
-import { makeTargets } from "../../lib/package/target";
-import { exists } from "../../lib/util/fs";
-import { makeTemporaryDirectory } from "./util";
+import { type Config } from "../../../lib/config";
+import { createPackage } from "../../../lib/package/create";
+import { makeTargets } from "../../../lib/package/target";
+import { exists } from "../../../lib/util/fs";
+import { makeTemporaryDirectory } from "../util";
 
 describe("Basic package integration tests", () => {
   let tmpDir: string;

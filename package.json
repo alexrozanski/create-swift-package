@@ -6,8 +6,9 @@
   "scripts": {
     "dev": "esbuild index.ts --bundle --outdir=dist --platform=node --watch --loader:.mustache=text",
     "test": "npm run unit && npm run integration",
-    "unit": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/unit\"",
-    "integration": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/integration\""
+    "test:unit": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/unit\"",
+    "test:integration:basic": "NODE_OPTIONS='--experimental-vm-modules' jest \"test/integration/basic\"",
+    "test:integration:all": "NODE_OPTIONS='--experimental-vm-modules' jest --verbose \"test/integration\""
   },
   "keywords": [
     "swift",
