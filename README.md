@@ -9,21 +9,14 @@ A command-line utility to create Swift packages with ✨ flair ✨
 - 🔮 **Interactive:** Answer a set of questions interactively to configure your shiny new Swift package.
 - ⚒️ **Feature-rich:** Built-in support for generating `library` and `executable` products, mixed-language targets and more.
 - 👷 **Extensive support:** Allows you to generate packages targeting macOS, iOS, watchOS and tvOS from Swift 5.4+.
-- 🚦 **Well-tested:** Supported by unit and integration tests over various Swift tools versions. 
+- 🚦 **Well-tested:** Supported by unit and integration tests over various Swift tools versions.
 
 ## 🎁 Installation
 
-`create-swift-package` is distributed via `npm`. You can run it with `npx`:
+`create-swift-package` is distributed via `npm` and for best results requires Node 16.10+ or 18.0.0+. You can run it with `npx`:
 
 ```bash
 $ npx create-swift-package
-```
-
-or install with Yarn:
-
-```bash
-$ yarn global add create-swift-package
-$ create-swift-package
 ```
 
 ## 🧑‍💻 Usage
