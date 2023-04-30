@@ -94,7 +94,19 @@ const makeMainTarget = (
       template: `${productType}/main/swift`,
       props: { targetName: mainName },
     },
-    cxxTemplates: {},
+    cxxTemplates: {
+      header:
+        productType === "library"
+          ? {
+              template: `library/main/objCHeader`,
+              props: { targetName: mainName },
+            }
+          : undefined,
+      implementation: {
+        template: `${productType}/main/objCImplementation`,
+        props: { targetName: mainName },
+      },
+    },
   }),
 });
 
@@ -113,7 +125,16 @@ const makeSupportingTarget = (
       template: "supporting/main/swift",
       props: { targetName: name },
     },
-    cxxTemplates: {},
+    cxxTemplates: {
+      header: {
+        template: "supporting/main/objCHeader",
+        props: { targetName: name },
+      },
+      implementation: {
+        template: "supporting/main/objCImplementation",
+        props: { targetName: name },
+      },
+    },
   }),
 });
 
@@ -121,22 +142,35 @@ const makeTestTarget = (
   mainTarget: Target,
   productType: ProductType,
   config: Config
-): Target => ({
-  name: `${mainTarget.name}Tests`,
-  role: "test",
-  language: mainTarget.language,
-  dependencies: [mainTarget],
-  files: makeFiles(`${mainTarget.name}Tests`, mainTarget.language, config, {
-    swiftTemplate: {
-      template: "test/testCase/swift",
-      props: {
-        targetName: mainTarget.name,
-        productType: productType.charAt(0).toUpperCase() + productType.slice(1),
+): Target => {
+  // We process this here as we're passing it straight to the template engine.
+  const productTypeString =
+    productType.charAt(0).toUpperCase() + productType.slice(1);
+  return {
+    name: `${mainTarget.name}Tests`,
+    role: "test",
+    language: mainTarget.language,
+    dependencies: [mainTarget],
+    files: makeFiles(`${mainTarget.name}Tests`, mainTarget.language, config, {
+      swiftTemplate: {
+        template: "test/testCase/swift",
+        props: {
+          targetName: mainTarget.name,
+          productType: productTypeString,
+        },
       },
-    },
-    cxxTemplates: {},
-  }),
-});
+      cxxTemplates: {
+        implementation: {
+          template: "test/testCase/objC",
+          props: {
+            targetName: mainTarget.name,
+            productType: productTypeString,
+          },
+        },
+      },
+    }),
+  };
+};
 
 /* Public */
 
