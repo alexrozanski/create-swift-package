@@ -71,11 +71,6 @@ export const allSwiftVersions: SwiftVersionInfo[] = swiftVersions
 export const ProductType = z.union([
   z.literal("library"),
   z.literal("executable"),
-  z.literal("plugin"),
 ]);
 export type ProductType = z.TypeOf<typeof ProductType>;
-export const allProductTypes: ProductType[] = [
-  "library",
-  "executable",
-  "plugin",
-];
+export const allProductTypes: ProductType[] = ["library", "executable"];

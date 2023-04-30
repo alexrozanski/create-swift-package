@@ -136,8 +136,6 @@ const productTypeChoices = (): Choice[] => {
           return "Library";
         case "executable":
           return "Executable";
-        case "plugin":
-          return "Plugin";
       }
     })(),
     value: productType,

@@ -56,31 +56,4 @@ describe("C-family target unit tests", () => {
     expect(targets[1].language).toBe("cfamily");
     expect(targets[1].role).toBe("test");
   });
-
-  test("creates simple plugin target", () => {
-    const config: Config = makeConfig({
-      name: "TestPackage",
-      productType: "plugin",
-      language: { type: "cfamily" },
-      includeTests: false,
-    });
-    const targets = makeTargets(config);
-    expect(targets.length).toBe(1);
-    expect(targets[0].language).toBe("cfamily");
-  });
-
-  test("creates simple plugin target with tests", () => {
-    const config: Config = makeConfig({
-      name: "TestPackage",
-      productType: "executable",
-      language: { type: "cfamily" },
-      includeTests: true,
-    });
-    const targets = makeTargets(config);
-    expect(targets.length).toBe(2);
-    expect(targets[0].language).toBe("cfamily");
-    expect(targets[0].role).toBe("main");
-    expect(targets[1].language).toBe("cfamily");
-    expect(targets[1].role).toBe("test");
-  });
 });

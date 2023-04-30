@@ -32,19 +32,4 @@ describe("Mixed language targets unit tests", () => {
     expect(targets[1].language).toBe("cfamily");
     expect(targets[1].name).toBe("TestExecutableObjCxx");
   });
-
-  test("creates mixed language plugin targets", () => {
-    const config: Config = makeConfig({
-      name: "TestPlugin",
-      productType: "plugin",
-      language: { type: "mixed" },
-      includeTests: false,
-    });
-    const targets = makeTargets(config);
-    expect(targets.length).toBe(2);
-    expect(targets[0].language).toBe("swift");
-    expect(targets[0].name).toBe("TestPlugin");
-    expect(targets[1].language).toBe("cfamily");
-    expect(targets[1].name).toBe("TestPluginObjCxx");
-  });
 });

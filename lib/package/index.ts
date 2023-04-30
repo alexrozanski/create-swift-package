@@ -19,8 +19,6 @@ const productValue = (
       return init(".library", [arg("name", name), arg("targets", [name])]);
     case "executable":
       return init(".executable", [arg("name", name), arg("targets", [name])]);
-    case "plugin":
-      return init(".plugin", [arg("name", name), arg("targets", [name])]);
   }
 };
 
