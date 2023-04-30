@@ -91,7 +91,7 @@ const makeMainTarget = (
   dependencies,
   files: makeFiles(mainName, language, config, {
     swiftTemplate: {
-      template: `swift/${productType}/main`,
+      template: `${productType}/main/swift`,
       props: { targetName: mainName },
     },
     cxxTemplates: {},
@@ -110,22 +110,29 @@ const makeSupportingTarget = (
   dependencies,
   files: makeFiles(name, language, config, {
     swiftTemplate: {
-      template: "swift/supporting/main",
+      template: "supporting/main/swift",
       props: { targetName: name },
     },
     cxxTemplates: {},
   }),
 });
 
-const makeTestTarget = (mainTarget: Target, config: Config): Target => ({
+const makeTestTarget = (
+  mainTarget: Target,
+  productType: ProductType,
+  config: Config
+): Target => ({
   name: `${mainTarget.name}Tests`,
   role: "test",
   language: mainTarget.language,
   dependencies: [mainTarget],
   files: makeFiles(`${mainTarget.name}Tests`, mainTarget.language, config, {
     swiftTemplate: {
-      template: "swift/test/testCase",
-      props: { targetName: mainTarget.name },
+      template: "test/testCase/swift",
+      props: {
+        targetName: mainTarget.name,
+        productType: productType.charAt(0).toUpperCase() + productType.slice(1),
+      },
     },
     cxxTemplates: {},
   }),
@@ -168,7 +175,7 @@ export const makeTargets = (config: Config): Target[] => {
   }
 
   if (config.includeTests) {
-    targets.push(makeTestTarget(mainTarget, config));
+    targets.push(makeTestTarget(mainTarget, productType, config));
   }
 
   return targets;

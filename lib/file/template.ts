@@ -2,6 +2,7 @@ import cxxUmbrella from "../../templates/cxx/umbrella.h.mustache";
 import executableMainSwift from "../../templates/executable/main.swift.mustache";
 import gitignore from "../../templates/git/.gitignore.mustache";
 import libraryMainSwift from "../../templates/library/main.swift.mustache";
+import testCaseObjC from "../../templates/test/TestCase.m.mustache";
 import testCaseSwift from "../../templates/test/testCase.swift.mustache";
 
 import Mustache from "mustache";
@@ -9,11 +10,18 @@ import Mustache from "mustache";
 export type Template =
   | { template: "gitignore"; props: {} } // Doesn't need to be run through Mustache but this makes this easier
   | { template: "cxx/umbrella"; props: { targetName: string } }
-  | { template: "swift/executable/main"; props: { targetName: string } }
-  | { template: "swift/library/main"; props: { targetName: string } }
-  | { template: "swift/plugin/main"; props: { targetName: string } }
-  | { template: "swift/supporting/main"; props: { targetName: string } }
-  | { template: "swift/test/testCase"; props: { targetName: string } };
+  | { template: "executable/main/swift"; props: { targetName: string } }
+  | { template: "library/main/swift"; props: { targetName: string } }
+  | { template: "plugin/main/swift"; props: { targetName: string } }
+  | { template: "supporting/main/swift"; props: { targetName: string } }
+  | {
+      template: "test/testCase/swift";
+      props: { targetName: string; productType: string };
+    }
+  | {
+      template: "test/testCase/objC";
+      props: { targetName: string; productType: string };
+    };
 
 // Use imports so we don't have to mess around with files on disk, and they all get bundled into the distribution.
 const getTemplateContents = (template: Template) => {
@@ -22,16 +30,18 @@ const getTemplateContents = (template: Template) => {
       return gitignore;
     case "cxx/umbrella":
       return cxxUmbrella;
-    case "swift/executable/main":
+    case "executable/main/swift":
       return executableMainSwift;
-    case "swift/library/main":
+    case "library/main/swift":
       return libraryMainSwift;
-    case "swift/plugin/main":
+    case "plugin/main/swift":
       return "";
-    case "swift/supporting/main":
+    case "supporting/main/swift":
       return "";
-    case "swift/test/testCase":
+    case "test/testCase/swift":
       return testCaseSwift;
+    case "test/testCase/objC":
+      return testCaseObjC;
   }
 };
 

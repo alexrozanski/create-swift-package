@@ -176,7 +176,7 @@ export const createPackage = async (props: {
         chalk.green(
           `\nPackage successfully created at ${chalk.bold(
             config.projectDir
-          )}}:\n`
+          )}):\n`
         )
       );
     }

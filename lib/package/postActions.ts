@@ -53,7 +53,9 @@ export const initGitRepo = async (directory: string) => {
 
 /* Swift build */
 
-const swiftBuildMessage = "Building Swift package [Ctrl-C] to stop...";
+const swiftBuildMessage = chalk.bold(
+  "Building Swift package [Ctrl-C] to stop..."
+);
 
 // Only run this after checking we can run `swift build`.
 const runSwiftBuild = async (directory: string) => {
@@ -110,6 +112,9 @@ const runSwiftBuild = async (directory: string) => {
 
     subprocess.all?.pipe(customWritableStream);
     await subprocess;
+    clearOutput();
+    swiftOutput = "";
+    writeOutput();
     spinner.succeed();
     return true;
   } catch (error) {
