@@ -2,8 +2,10 @@
 
 # `create-swift-package`
 
+![create-swift-package demo](resources/demo.gif)
+
 A command-line utility to create Swift packages with ✨ flair ✨
-t
+
 - 🔮 **Interactive:** Answer a set of questions interactively to configure your shiny new Swift package.
 - ⚒️ **Feature-rich:** Built-in support for generating `library` and `executable` products, mixed-language targets and more.
 - 👷 **Extensive support:** Allows you to generate packages targeting macOS, iOS, watchOS and tvOS from Swift 5.4+.
