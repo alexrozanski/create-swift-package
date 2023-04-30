@@ -25,8 +25,8 @@ const cli = parse(process.argv, packageJson);
       options: {
         dryRun: cli.dryRun,
         interactive: true,
-        runSwiftBuild: !cli.noSwiftBuild,
-        promptXcode: !cli.noPromptXcode,
+        runSwiftBuild: cli.swiftBuild,
+        promptXcode: cli.promptXcode,
       },
     });
   } catch (err) {

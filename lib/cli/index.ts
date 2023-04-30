@@ -3,8 +3,8 @@ import { Command } from "commander";
 export type CliOptions = {
   projectDirectory?: string;
   dryRun: boolean;
-  noSwiftBuild: boolean;
-  noPromptXcode: boolean;
+  swiftBuild: boolean;
+  promptXcode: boolean;
 };
 
 export const parse = (
@@ -15,8 +15,8 @@ export const parse = (
 
   let parsedArgs: CliOptions = {
     dryRun: false,
-    noSwiftBuild: false,
-    noPromptXcode: false,
+    swiftBuild: true,
+    promptXcode: true,
   };
   const command = new Command(name)
     .version(version)
@@ -49,8 +49,7 @@ export const parse = (
   return {
     ...parsedArgs,
     dryRun: !!command.opts().dryRun,
-    // These args are confusing because the 'no' is dropped.
-    noSwiftBuild: !!command.opts().swiftBuild,
-    noPromptXcode: !!command.opts().promptXcode,
+    swiftBuild: !!command.opts().swiftBuild,
+    promptXcode: !!command.opts().promptXcode,
   };
 };
