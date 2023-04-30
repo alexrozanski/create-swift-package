@@ -143,15 +143,16 @@ const makeTestTarget = (
   productType: ProductType,
   config: Config
 ): Target => {
+  const testTargetName = `${mainTarget.name}Tests`;
   // We process this here as we're passing it straight to the template engine.
   const productTypeString =
     productType.charAt(0).toUpperCase() + productType.slice(1);
   return {
-    name: `${mainTarget.name}Tests`,
+    name: testTargetName,
     role: "test",
     language: mainTarget.language,
     dependencies: [mainTarget],
-    files: makeFiles(`${mainTarget.name}Tests`, mainTarget.language, config, {
+    files: makeFiles(testTargetName, mainTarget.language, config, {
       swiftTemplate: {
         template: "test/testCase/swift",
         props: {
@@ -160,6 +161,11 @@ const makeTestTarget = (
         },
       },
       cxxTemplates: {
+        // An include directory is needed for Obj-C targets so put a placeholder umbrella header here.
+        header: {
+          template: "cxx/umbrella",
+          props: { targetName: testTargetName },
+        },
         implementation: {
           template: "test/testCase/objC",
           props: {
