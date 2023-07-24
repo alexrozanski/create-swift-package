@@ -5,6 +5,10 @@
  */
 export const swiftVersions = [
   {
+    version: "5.8.1",
+    releaseDate: "01 Jun 23",
+  },
+  {
     version: "5.8",
     releaseDate: "30 Mar 23",
   },
