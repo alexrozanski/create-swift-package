@@ -44,7 +44,7 @@ const targetValue = (target: Target): Value => {
       break;
   }
 
-  return init(".target", [
+  return init(target.role === "test" ? ".testTarget" : ".target", [
     arg("name", target.name),
     arg(
       "dependencies",
