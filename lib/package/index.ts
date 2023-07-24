@@ -31,16 +31,17 @@ const productValue = (
 };
 
 const targetValue = (target: Target): Value => {
-  let publicHeadersArg: Argument | null;
+  let publicHeadersArg: Argument | null = null;
   switch (target.language.type) {
     case "cfamily":
-      publicHeadersArg = arg(
-        "publicHeadersPath",
-        target.language.publicHeadersPath
-      );
+      if (target.role !== "test") {
+        publicHeadersArg = arg(
+          "publicHeadersPath",
+          target.language.publicHeadersPath
+        );
+      }
       break;
     case "swift":
-      publicHeadersArg = null;
       break;
   }
 
